@@ -67,7 +67,7 @@ button { font: inherit; cursor: pointer; }
 }
 .menu a:hover { background: rgba(255, 255, 255, .12); }
 
-/* --- HERO COM IMAGEM REAL DE FUNDO (Leve, limpo e sem travamentos) --- */
+/* --- HERO COM A SUA IMAGEM PERSONALIZADA (fundo.png) --- */
 .hero {
   position: relative;
   min-height: 85vh;
@@ -77,11 +77,12 @@ button { font: inherit; cursor: pointer; }
   justify-content: center;
   overflow: hidden;
   padding: 40px 20px;
-  background: linear-gradient(rgba(6, 9, 19, 0.72), rgba(6, 9, 19, 0.72)), 
-              url('https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+  /* Camada escura suave (0.4) para garantir contraste nos textos, mantendo visível a sua imagem */
+  background: linear-gradient(rgba(6, 9, 19, 0.4), rgba(6, 9, 19, 0.4)), 
+              url('fundo.png') center/cover no-repeat;
 }
 
-/* Vídeo antigo desativado para garantir fluidez total nos aparelhos antigos */
+/* Garante que o vídeo antigo continue desativado para zero travamentos */
 .hero-video {
   display: none !important;
 }
