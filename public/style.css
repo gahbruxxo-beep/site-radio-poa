@@ -67,7 +67,7 @@ button { font: inherit; cursor: pointer; }
 }
 .menu a:hover { background: rgba(255, 255, 255, .12); }
 
-/* --- HERO COM IMAGEM REAL DE FUNDO (Leve e sem travamentos) --- */
+/* --- HERO COM IMAGEM REAL DE FUNDO (Leve, limpo e sem travamentos) --- */
 .hero {
   position: relative;
   min-height: 85vh;
@@ -77,12 +77,11 @@ button { font: inherit; cursor: pointer; }
   justify-content: center;
   overflow: hidden;
   padding: 40px 20px;
-  /* Imagem real de Porto Alegre (Guaíba) com escurecimento leve para contraste */
   background: linear-gradient(rgba(6, 9, 19, 0.72), rgba(6, 9, 19, 0.72)), 
               url('https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
 }
 
-/* Vídeo antigo desativado para garantir fluidez total */
+/* Vídeo antigo desativado para garantir fluidez total nos aparelhos antigos */
 .hero-video {
   display: none !important;
 }
@@ -91,7 +90,7 @@ button { font: inherit; cursor: pointer; }
   display: none !important;
 }
 
-/* Cartão do player limpo e leve (sem blur pesado para poupar a TV antiga) */
+/* Cartão do player leve e otimizado (sem blur pesado) */
 .glass-card {
   position: relative;
   z-index: 3;
