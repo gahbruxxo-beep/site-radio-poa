@@ -261,8 +261,6 @@ button { font: inherit; cursor: pointer; }
 .hero-aviso:empty { display: none; }
 
 @media (min-width: 860px) {
-  /* as faixas do céu continuam até as bordas da tela */
-  .hero { background: linear-gradient(to bottom, #1B2140 0 31%, #3A2C5E 31% 45.2%, #B54A78 45.2% 53.6%, #F08A45 53.6% 59.5%, #24506A 59.5% 100%); }
   .hero-texto { position: absolute; z-index: 2; left: 32px; top: 24px; width: 46%; padding: 0; }
   .hero h1 { font-size: clamp(2.6rem, 4.6vw, 3.8rem); }
   .hero-slogan { color: #E4DFF2; }
