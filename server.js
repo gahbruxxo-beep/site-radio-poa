@@ -13,7 +13,6 @@ const crypto = require('crypto');
 const RAIZ = __dirname;
 const PUBLICO = path.join(RAIZ, 'public');
 const DADOS = path.join(RAIZ, 'dados');
-const ARQ_PEDIDOS = path.join(DADOS, 'pedidos.json');
 
 function lerJson(arq, padrao) {
   try {
@@ -150,7 +149,6 @@ async function atualizarCategoria(cat) {
   }
   const antigo = cacheNoticias[cat.id];
   if (!unicos.length && antigo && antigo.itens.length) {
-    // mantém o que já tinha se a busca falhou
     antigo.erro = true;
     return;
   }
@@ -166,7 +164,7 @@ async function atualizarTudo() {
       /* segue para a próxima */
     }
   }
-  resumoCache = null; // força novo resumo depois de novas notícias
+  resumoCache = null;
 }
 
 function listarNoticias(catId, periodo) {
@@ -199,7 +197,7 @@ function listarNoticias(catId, periodo) {
 /* ------------------------------------------------------------------ */
 /* Resumo do dia por I.A. (opcional)                                   */
 /* ------------------------------------------------------------------ */
-let resumoCache = null; // { ts, texto }
+let resumoCache = null;
 
 async function gerarResumo() {
   const ia = config.ia || {};
@@ -282,7 +280,7 @@ async function lerAoVivo() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Pedidos de música e recados                                         */
+/* Pedidos de música e recados (Supabase)                             */
 /* ------------------------------------------------------------------ */
 const ultimoPedidoPorIp = new Map();
 const tentativasAdminPorIp = new Map();
@@ -291,12 +289,58 @@ const DURACAO_SESSAO_ADMIN = 12 * 60 * 60 * 1000;
 const JANELA_TENTATIVAS_ADMIN = 15 * 60 * 1000;
 const MAX_TENTATIVAS_ADMIN = 8;
 
-function lerPedidos() {
-  return lerJson(ARQ_PEDIDOS, []);
+const SUPABASE_URL = process.env.SUPABASE_URL || (config.supabase && config.supabase.url);
+const SUPABASE_KEY = process.env.SUPABASE_KEY || (config.supabase && config.supabase.chave);
+
+async function lerPedidos() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return [];
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?select=*&order=data.desc`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!r.ok) return [];
+    return await r.json();
+  } catch (e) {
+    return [];
+  }
 }
-function gravarPedidos(lista) {
-  fs.mkdirSync(DADOS, { recursive: true });
-  fs.writeFileSync(ARQ_PEDIDOS, JSON.stringify(lista, null, 2), 'utf8');
+
+async function adicionarPedidoSupabase(pedido) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(pedido)
+    });
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function apagarPedidoSupabase(id) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
 }
 
 function senhaCorreta(recebida) {
@@ -351,7 +395,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   'font-src https://fonts.gstatic.com',
   "img-src 'self' data:",
-"connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com",
+  "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com",
   'media-src *',
   "frame-ancestors 'self'",
 ].join('; ');
@@ -468,9 +512,16 @@ const servidor = http.createServer(async (req, res) => {
       const texto = String(d.texto || '').trim().slice(0, 300);
       const tipo = d.tipo === 'recado' ? 'recado' : 'musica';
       if (texto.length < 3) return responderJson(res, 400, { erro: 'Escreva um pouquinho mais.' });
-      const lista = lerPedidos();
-      lista.push({ id: crypto.randomBytes(6).toString('hex'), data: new Date().toISOString(), nome: nome || 'Ouvinte', tipo, texto });
-      gravarPedidos(lista.slice(-500));
+      
+      const novoPedido = { 
+        id: crypto.randomBytes(6).toString('hex'), 
+        data: new Date().toISOString(), 
+        nome: nome || 'Ouvinte', 
+        tipo, 
+        texto 
+      };
+      await adicionarPedidoSupabase(novoPedido);
+
       ultimoPedidoPorIp.set(ip, agora);
       return responderJson(res, 200, { ok: true });
     }
@@ -507,11 +558,12 @@ const servidor = http.createServer(async (req, res) => {
     if (rota.startsWith('/api/admin/')) {
       if (!sessaoAdminValida(req)) return responderJson(res, 401, { erro: 'Entre novamente para acessar o painel.' });
       if (rota === '/api/admin/pedidos' && req.method === 'GET') {
-        return responderJson(res, 200, { pedidos: lerPedidos().reverse() });
+        const pedidos = await lerPedidos();
+        return responderJson(res, 200, { pedidos });
       }
       const m = rota.match(/^\/api\/admin\/pedidos\/([a-f0-9]+)$/);
       if (m && req.method === 'DELETE') {
-        gravarPedidos(lerPedidos().filter((p) => p.id !== m[1]));
+        await apagarPedidoSupabase(m[1]);
         return responderJson(res, 200, { ok: true });
       }
       return responderJson(res, 404, { erro: 'Não encontrado.' });
@@ -534,7 +586,6 @@ const servidor = http.createServer(async (req, res) => {
 /* Partida                                                             */
 /* ------------------------------------------------------------------ */
 if (require.main === module) {
-  fs.mkdirSync(DADOS, { recursive: true });
   servidor.listen(PORTA, '0.0.0.0', () => {
     console.log('');
     console.log('  ' + config.nomeRadio + ' - site no ar!');

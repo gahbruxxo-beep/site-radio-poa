@@ -16,10 +16,14 @@
   "feedsExtras": [
     { "cat": "rs", "nome": "g1 RS", "url": "https://g1.globo.com/rss/g1/rs/rio-grande-do-sul/" }
   ],
-  "atualizarNoticiasACadaMinutos": 15,
+"atualizarNoticiasACadaMinutos": 15,
   "ia": {
     "ativa": false,
     "modelo": "gemini-2.5-flash",
     "chave": "AQ.Ab8RN6L7Vikzja7KTfi2UFQ6s5qWQEn8m5v_7pmviJFUIL9yvQ"
+  },
+  "supabase": {
+    "url": "https://ivczfmvlrbyyrlffhjmt.supabase.co",
+    "chave": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2Y3pmbXZscmJ5eXJsZmZoam10Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDY1MzMxOSwiZXhwIjoyMTA2MjI5MzE5fQ.nvIcCOgK6y_E9iq0DziGJpXlNfYSBsVcYfnLbLQmqvc"
   }
 }

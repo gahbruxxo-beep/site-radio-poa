@@ -1,0 +1,9 @@
+# Temporários do Google Drive
+.tmp.driveupload*
+*~
+.DS_Store
+Thumbs.db
+
+# Pastas de sistema
+node_modules/
+dados/
