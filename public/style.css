@@ -67,7 +67,7 @@ button { font: inherit; cursor: pointer; }
 }
 .menu a:hover { background: rgba(255, 255, 255, .12); }
 
-/* --- HERO ULTRA OTIMIZADO PARA FIRE STICK E CELULARES ANTIGOS --- */
+/* --- HERO COM IMAGEM REAL DE FUNDO (Leve e sem travamentos) --- */
 .hero {
   position: relative;
   min-height: 85vh;
@@ -77,10 +77,12 @@ button { font: inherit; cursor: pointer; }
   justify-content: center;
   overflow: hidden;
   padding: 40px 20px;
-  background: linear-gradient(135deg, #060913 0%, #151d36 100%);
+  /* Imagem real de Porto Alegre (Guaíba) com escurecimento leve para contraste */
+  background: linear-gradient(rgba(6, 9, 19, 0.72), rgba(6, 9, 19, 0.72)), 
+              url('https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
 }
 
-/* Vídeo de fundo totalmente desativado para garantir fluidez extrema */
+/* Vídeo antigo desativado para garantir fluidez total */
 .hero-video {
   display: none !important;
 }
@@ -89,18 +91,18 @@ button { font: inherit; cursor: pointer; }
   display: none !important;
 }
 
-/* Cartão leve sem desfoque pesado (backdrop-filter removido para poupar a GPU) */
+/* Cartão do player limpo e leve (sem blur pesado para poupar a TV antiga) */
 .glass-card {
   position: relative;
   z-index: 3;
-  background: #111729;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(17, 23, 41, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   padding: 40px 30px;
   max-width: 800px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
 }
 
 .badge-ao-vivo {
