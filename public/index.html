@@ -55,28 +55,24 @@
 </header>
 
 <main>
-<!-- Abertura: Design Moderno com Efeito Glassmorphism -->
+<!-- Abertura: Design Moderno e Responsivo -->
   <section class="hero" id="inicio" aria-label="Rádio ao vivo">
     <div class="hero-glow-bg"></div>
     <div class="hero-in glass-card">
-      <div class="hero-texto">
-        <span class="badge-ao-vivo">🔴 AO VIVO AGORA</span>
-        <h1 class="neon-title">Web Rádio Zona Sul</h1>
-        <p class="slogan-sub">Porto Alegre • A sua conexão musical definitiva</p>
-        
-        <p class="agora" aria-live="polite">
-          <span class="ponto" aria-hidden="true"></span>
-          <span id="agoraTexto">Toque no botão abaixo para curtir o som</span>
-        </p>
-      </div>
-
-      <div class="hero-actions">
+      <div class="badge-ao-vivo">🔴 AO VIVO AGORA</div>
+      <h1 class="neon-title">Web Rádio Zona Sul</h1>
+      <p class="slogan-sub">Porto Alegre • A sua conexão musical definitiva</p>
+      
+      <div class="hero-player-box">
         <button class="sol-btn-modern" id="solBtn" type="button" aria-label="Ouvir a rádio">
           <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#fff"/></svg>
           <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/></svg>
           <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
         </button>
-        <span class="play-label-tip">Aperte para reproduzir</span>
+        <p class="agora" aria-live="polite">
+          <span class="ponto" aria-hidden="true"></span>
+          <span id="agoraTexto">Toque no botão para ouvir a transmissão</span>
+        </p>
       </div>
     </div>
     <p class="hero-aviso" id="heroAviso" role="status"></p>
