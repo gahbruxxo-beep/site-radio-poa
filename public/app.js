@@ -523,10 +523,11 @@
   }
 
   async function carregarClima() {
-    const box = $('#clima');
+    const box = $('#clima') || $('#tempo') || $('.tempo-container');
+    if (!box) return;
     try {
-      const c = CFG.cidade || { lat: -30.0346, lon: -51.2177 };
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + c.lat + '&longitude=' + c.lon +
+      // Coordenadas fixas e diretas de Porto Alegre para evitar travamentos na Render
+      const url = 'https://open-meteo.com' +
         '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
         '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
         '&timezone=America%2FSao_Paulo&forecast_days=5';
@@ -781,7 +782,7 @@
   /* ============================================================== */
   /* Início                                                          */
   /* ============================================================== */
-  async function iniciar() {
+    async function iniciar() {
     iniciarHoroscopo();
     iniciarGauches();
     novoQuiz();
@@ -791,21 +792,27 @@
       CFG = await api('/api/config');
     } catch (e) { /* usa o padrão */ }
     document.title = CFG.nomeRadio + ' - rádio online, notícias e horóscopo';
-    $('#marca').textContent = CFG.nomeRadio;
-    $('#hNome').textContent = CFG.nomeRadio;
-    $('#hSlogan').textContent = CFG.slogan || '';
-    $('#rodapeNome').textContent = CFG.nomeRadio;
+    if ($('#marca')) $('#marca').textContent = CFG.nomeRadio;
+    if ($('#hNome')) $('#hNome').textContent = CFG.nomeRadio;
+    if ($('#hSlogan')) $('#hSlogan').textContent = CFG.slogan || '';
+    if ($('#rodapeNome')) $('#rodapeNome').textContent = CFG.nomeRadio;
     atualizarTextosRadio();
 
-    montarChips(CFG.categorias || []);
-    carregarNoticias();
-    carregarResumo();
-    carregarClima();
-    atualizarAoVivo();
+    if (CFG.categorias) montarChips(CFG.categorias);
+    
+    // Pequena pausa inteligente de 1.5 segundos para a Render acordar o banco de dados antes de listar as notícias
+    setTimeout(() => {
+        carregarNoticias(false);
+        carregarClima();
+        carregarResumo();
+        atualizarAoVivo();
+    }, 1500);
+
     setInterval(atualizarAoVivo, 20000);
-    setInterval(() => carregarNoticias(), 10 * 60000);
+    setInterval(() => carregarNoticias(false), 10 * 60000);
     setInterval(carregarClima, 30 * 60000);
   }
+
   iniciar();
 
   if ('serviceWorker' in navigator) {
