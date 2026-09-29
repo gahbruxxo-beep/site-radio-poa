@@ -1,0 +1,25 @@
+{
+  "nomeRadio": "Web Rádio Zona Sul",
+  "slogan": "A rádio que toca Porto Alegre",
+  "streamUrl": "https://stm9.voxhd.com.br:13270",
+  "porta": 3000,
+  "senhaAdmin": "Mr4kim6q@",
+  "cidade": { "nome": "Porto Alegre", "lat": -30.0346, "lon": -51.2177 },
+  "categorias": [
+    { "id": "cidade",  "nome": "Cidade",   "consulta": "\"Porto Alegre\" prefeitura OR bairro OR cidade OR moradores" },
+    { "id": "transito","nome": "Trânsito", "consulta": "\"Porto Alegre\" trânsito OR EPTC OR Trensurb OR ônibus OR bloqueio" },
+    { "id": "esporte", "nome": "Esporte",  "consulta": "Grêmio OR \"Sport Club Internacional\"" },
+    { "id": "regiao",  "nome": "Região",   "consulta": "Canoas OR Gravataí OR \"São Leopoldo\" OR \"Novo Hamburgo\" OR Viamão OR Alvorada OR Cachoeirinha" },
+    { "id": "cultura", "nome": "Cultura",  "consulta": "\"Porto Alegre\" show OR teatro OR exposição OR festival OR evento" },
+    { "id": "rs",      "nome": "Rio Grande do Sul", "consulta": "\"Rio Grande do Sul\" governo OR economia OR clima" }
+  ],
+  "feedsExtras": [
+    { "cat": "rs", "nome": "g1 RS", "url": "https://g1.globo.com/rss/g1/rs/rio-grande-do-sul/" }
+  ],
+  "atualizarNoticiasACadaMinutos": 15,
+  "ia": {
+    "ativa": false,
+    "modelo": "gemini-2.5-flash",
+    "chave": ""
+  }
+}

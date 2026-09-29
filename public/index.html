@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rádio online</title>
+  <meta name="description" content="Rádio ao vivo, notícias de Porto Alegre e região, horóscopo do dia e passatempos.">
+  <meta name="theme-color" content="#1B2140">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body data-radio="parado">
+<a class="pular" href="#noticias">Ir para as notícias</a>
+
+<header class="topo">
+  <a class="marca" href="#inicio" id="marca">Rádio</a>
+  <nav class="menu" aria-label="Seções do site">
+    <a href="#noticias">Notícias</a>
+    <a href="#horoscopo">Horóscopo</a>
+    <a href="#tempo">Tempo</a>
+    <a href="#passatempo">Passatempo</a>
+    <a href="#pedidos">Pedidos</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Abertura: o sol é o botão de ouvir a rádio -->
+  <section class="hero" id="inicio" aria-label="Rádio ao vivo">
+    <div class="hero-in">
+      <div class="hero-texto">
+        <h1 id="hNome">Rádio</h1>
+        <p class="hero-slogan" id="hSlogan"></p>
+        <p class="agora" aria-live="polite"><span class="ponto" aria-hidden="true"></span><span id="agoraTexto">Toque no sol para ouvir</span></p>
+      </div>
+
+      <div class="escena">
+        <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <defs>
+            <clipPath id="ceu"><rect x="0" y="0" width="900" height="250"/></clipPath>
+          </defs>
+          <!-- céu em faixas -->
+          <rect width="900" height="130" fill="#1B2140"/>
+          <rect y="130" width="900" height="60" fill="#3A2C5E"/>
+          <rect y="190" width="900" height="35" fill="#B54A78"/>
+          <rect y="225" width="900" height="25" fill="#F08A45"/>
+          <!-- sol -->
+          <circle cx="630" cy="250" r="80" fill="#FFC145" clip-path="url(#ceu)"/>
+          <!-- silhueta da Usina do Gasômetro -->
+          <g fill="#1B2140">
+            <rect x="58" y="196" width="9" height="54"/>
+            <rect x="55" y="192" width="15" height="6"/>
+            <rect x="74" y="226" width="96" height="24"/>
+            <rect x="82" y="216" width="12" height="10"/>
+            <rect x="112" y="220" width="20" height="6"/>
+          </g>
+          <!-- rio -->
+          <rect y="250" width="900" height="170" fill="#24506A"/>
+          <g class="rio-linhas" stroke="#4C86A0" stroke-width="2" stroke-linecap="round">
+            <line x1="40" y1="272" x2="150" y2="272"/>
+            <line x1="220" y1="290" x2="360" y2="290"/>
+            <line x1="90" y1="318" x2="200" y2="318"/>
+            <line x1="380" y1="336" x2="470" y2="336"/>
+            <line x1="740" y1="282" x2="860" y2="282"/>
+            <line x1="700" y1="330" x2="800" y2="330"/>
+            <line x1="520" y1="380" x2="660" y2="380"/>
+            <line x1="120" y1="368" x2="260" y2="368"/>
+          </g>
+          <!-- reflexo do sol -->
+          <g fill="#FFC145" class="reflexo">
+            <rect x="555" y="260" width="150" height="7" rx="3.5"/>
+            <rect x="568" y="276" width="124" height="7" rx="3.5" opacity=".9"/>
+            <rect x="580" y="292" width="100" height="7" rx="3.5" opacity=".8"/>
+            <rect x="592" y="309" width="76" height="6" rx="3" opacity=".7"/>
+            <rect x="603" y="327" width="54" height="6" rx="3" opacity=".6"/>
+            <rect x="613" y="347" width="34" height="5" rx="2.5" opacity=".5"/>
+          </g>
+        </svg>
+        <button class="sol-btn" id="solBtn" type="button" aria-label="Ouvir a rádio">
+          <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#1B2140"/></svg>
+          <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/></svg>
+          <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#1B2140" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <p class="hero-aviso" id="heroAviso" role="status"></p>
+  </section>
+
+  <!-- Notícias -->
+  <section class="secao" id="noticias">
+    <div class="secao-in">
+      <div class="secao-cab">
+        <div>
+          <h2>Notícias de Porto Alegre e região</h2>
+          <p class="secao-sub">Manchetes reunidas de vários portais e atualizadas sozinhas. Ao tocar numa notícia, você abre a matéria no site original.</p>
+        </div>
+        <div class="noticia-controles">
+          <div class="segmento" role="group" aria-label="Período">
+            <button type="button" data-periodo="hoje" aria-pressed="true">Hoje</button>
+            <button type="button" data-periodo="semana" aria-pressed="false">Semana</button>
+          </div>
+          <button type="button" class="btn-sec" id="btnAtualizar">Atualizar</button>
+        </div>
+      </div>
+
+      <div class="chips" id="chips" role="group" aria-label="Assuntos"></div>
+
+      <div class="resumo" id="resumo" hidden>
+        <h3>Resumo do dia</h3>
+        <p id="resumoTexto"></p>
+      </div>
+
+      <div id="listaNoticias" class="noticias" aria-live="polite"></div>
+      <p class="nota" id="notaNoticias"></p>
+    </div>
+  </section>
+
+  <!-- Horóscopo -->
+  <section class="secao secao-clara" id="horoscopo">
+    <div class="secao-in">
+      <h2>Horóscopo do dia</h2>
+      <p class="secao-sub">Escolha o seu signo e leia a previsão de hoje. Ela muda todo dia.</p>
+
+      <div class="signos" id="signos" role="group" aria-label="Escolha o signo"></div>
+
+      <details class="descobrir">
+        <summary>Não sei o meu signo</summary>
+        <div class="descobrir-form">
+          <label>Dia
+            <select id="selDia"></select>
+          </label>
+          <label>Mês
+            <select id="selMes"></select>
+          </label>
+          <button type="button" class="btn-sec" id="btnDescobrir">Descobrir</button>
+          <p id="descobrirResp" role="status"></p>
+        </div>
+      </details>
+
+      <article class="horoscopo" id="horoscopoBox" hidden aria-live="polite"></article>
+      <p class="nota">Horóscopo feito para diversão. Ele é gerado pelo próprio site e não substitui a opinião de um astrólogo.</p>
+    </div>
+  </section>
+
+  <!-- Clima -->
+  <section class="secao" id="tempo">
+    <div class="secao-in">
+      <h2>Tempo em Porto Alegre</h2>
+      <div class="clima" id="clima" aria-live="polite">
+        <p class="nota">Carregando a previsão…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Passatempo -->
+  <section class="secao secao-clara" id="passatempo">
+    <div class="secao-in">
+      <h2>Passatempo</h2>
+      <p class="secao-sub">Um joguinho enquanto a música toca.</p>
+
+      <div class="passa-grade">
+        <div class="bloco" id="gauches">
+          <h3>Gauchês do dia</h3>
+          <p class="gauches-termo" id="gTermo"></p>
+          <p id="gSig"></p>
+          <button type="button" class="btn-sec" id="gOutra">Outra palavra</button>
+        </div>
+
+        <div class="bloco" id="quiz">
+          <h3>Quiz: você conhece Porto Alegre?</h3>
+          <div id="quizCorpo"></div>
+        </div>
+
+        <div class="bloco" id="forca">
+          <h3>Jogo da forca gaúcha</h3>
+          <div id="forcaCorpo"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pedidos -->
+  <section class="secao" id="pedidos">
+    <div class="secao-in secao-estreita">
+      <h2>Peça uma música ou mande um recado</h2>
+      <p class="secao-sub">Sua mensagem chega direto para quem cuida da rádio.</p>
+      <form id="formPedido" class="form" novalidate>
+        <fieldset class="tipo">
+          <legend>O que você quer enviar?</legend>
+          <label><input type="radio" name="tipo" value="musica" checked> Pedir uma música</label>
+          <label><input type="radio" name="tipo" value="recado"> Mandar um recado</label>
+        </fieldset>
+        <label>Seu nome
+          <input type="text" id="pNome" maxlength="40" autocomplete="name" placeholder="Como quer ser chamado?">
+        </label>
+        <label>Mensagem
+          <textarea id="pTexto" maxlength="300" rows="4" placeholder="Ex.: Toca “nome da música” do artista, para a minha mãe"></textarea>
+        </label>
+        <button type="submit" class="btn-prim">Enviar</button>
+        <p id="pResp" role="status"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p id="rodapeNome">Rádio</p>
+  <p class="nota">As notícias pertencem aos veículos que as publicaram. Previsão do tempo de Open-Meteo.</p>
+</footer>
+
+<!-- Player fixo -->
+<div class="player" id="player">
+  <button class="player-btn" id="playerBtn" type="button" aria-label="Ouvir a rádio">
+    <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#1B2140"/></svg>
+    <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/></svg>
+    <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#1B2140" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
+  </button>
+  <div class="player-info">
+    <p class="player-estado" id="playerEstado">Parada</p>
+    <p class="player-musica" id="playerMusica">Toque para ouvir</p>
+  </div>
+  <div class="player-lado">
+    <span class="player-ouvintes" id="playerOuvintes" hidden></span>
+    <label class="volume">
+      <span class="so-leitor">Volume</span>
+      <input type="range" id="volume" min="0" max="1" step="0.05" value="0.8">
+    </label>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

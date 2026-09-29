@@ -1,0 +1,43 @@
+SITE DA RÁDIO - COMO USAR
+=========================
+
+O QUE É
+Um site com a rádio ao vivo, notícias de Porto Alegre e região, horóscopo do dia,
+previsão do tempo, jogos e pedidos de música. Tudo grátis.
+
+PASSO 1 - INSTALAR O NODE.JS (só uma vez, é gratuito)
+  1. Entre em https://nodejs.org
+  2. Baixe a versão "LTS" e instale (clique em Avançar até o fim).
+
+PASSO 2 - LIGAR O SITE
+  1. Descompacte esta pasta (botão direito > Extrair tudo).
+  2. Dê dois cliques em "iniciar.bat".
+  3. Vai abrir uma janela preta com os endereços do site. Deixe ela aberta.
+  4. Abra no navegador:  http://localhost:3000
+  5. No celular, conectado no MESMO Wi-Fi, use o endereço "No celular" que aparece na janela.
+
+PASSO 3 - CONFIGURAR (opcional)
+Abra o arquivo "config.json" com o Bloco de Notas e troque:
+  - "nomeRadio": o nome da rádio
+  - "slogan": a frase que aparece embaixo do nome
+  - "senhaAdmin": a senha do painel de pedidos (TROQUE a senha padrão!)
+Salve o arquivo, feche a janela preta e abra o "iniciar.bat" de novo.
+
+PAINEL DE PEDIDOS
+Em http://localhost:3000/admin o dono da rádio vê os pedidos de música e recados,
+usando a senha definida no config.json.
+
+DEIXAR O SITE ABERTO PARA QUALQUER PESSOA NA INTERNET (grátis)
+Por padrão, só quem está na sua casa/Wi-Fi acessa. Para abrir ao público, o jeito
+gratuito é o "Cloudflare Tunnel". Quando você quiser fazer isso, me avise que eu
+te guio passo a passo. Lembre: o computador precisa ficar ligado e com o site aberto.
+
+I.A. NO RESUMO DO DIA (opcional, desligada por padrão)
+As notícias já se atualizam sozinhas. Se quiser um "Resumo do dia" escrito por I.A.,
+é preciso uma chave gratuita do Google Gemini. Me avise que eu explico como pegar
+e onde colocar (campo "ia" do config.json).
+
+SE A RÁDIO NÃO TOCAR
+O site testa alguns formatos de endereço automaticamente. Se mesmo assim não tocar,
+peça ao seu irmão o "link do stream" que termina com algo como /stream ou ;
+e coloque em "streamUrl" no config.json.

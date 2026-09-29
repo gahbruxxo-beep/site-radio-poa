@@ -1,0 +1,12 @@
+{
+  "name": "site-radio-poa",
+  "version": "1.0.0",
+  "description": "Site da Radio de Porto Alegre",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
