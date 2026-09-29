@@ -932,4 +932,10 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => { /* opcional */ });
   }
-})();
+})();// Navegação suave por foco para Smart TV (D-Pad)
+document.addEventListener('focusin', (e) => {
+  const el = e.target;
+  if (['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  }
+});

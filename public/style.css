@@ -32,7 +32,15 @@ h1, h2, h3 { font-family: var(--f-titulo); line-height: 1.1; margin: 0; }
 p { margin: 0; }
 a { color: var(--rio); }
 button { font: inherit; cursor: pointer; }
-:focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; border-radius: 4px; }
+/* Foco otimizado e de alta visibilidade para Smart TV / Controle Remoto */
+:focus-visible {
+  outline: 4px solid var(--sol) !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 20px rgba(255, 193, 69, 0.8) !important;
+  transform: scale(1.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  z-index: 50;
+}
 .so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .pular { position: absolute; left: -999px; top: 8px; background: var(--sol); color: var(--tinta); padding: 8px 14px; z-index: 100; border-radius: 8px; }
 .pular:focus { left: 8px; }
