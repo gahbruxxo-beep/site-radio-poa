@@ -59,11 +59,11 @@ button { font: inherit; cursor: pointer; }
 }
 .menu a:hover { background: rgba(255, 255, 255, .12); }
 
-/* --- ESTILO HERO MODERNO E RESPONSIVO --- */
+/* --- FUNDO MODERNO E LIMPO (SEM RISCAS ANTIGAS) --- */
 .hero {
   position: relative;
-  min-height: 90vh;
-  background: #060913;
+  min-height: 85vh;
+  background: radial-gradient(circle at center, #0f172a 0%, #060913 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -72,30 +72,16 @@ button { font: inherit; cursor: pointer; }
   padding: 60px 20px;
 }
 
-/* Fundo com luzes dinâmicas expansivas */
-.hero-glow-bg {
-  position: absolute;
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(0, 210, 255, 0.18) 0%, rgba(255, 123, 0, 0.1) 50%, transparent 75%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: pulseGlow 8s ease-in-out infinite alternate;
-  z-index: 1;
-  pointer-events: none;
+/* Garante que elementos gráficos antigos fiquem ocultos */
+.hero svg, .escena {
+  display: none !important;
 }
 
-@keyframes pulseGlow {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
-  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; }
-}
-
-/* Cartão com efeito de vidro fosco adaptado para PC e Mobile */
+/* --- CARTÃO DE VIDRO (GLASSMORPHISM) --- */
 .glass-card {
   position: relative;
   z-index: 2;
-  background: rgba(18, 24, 42, 0.75);
+  background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -104,7 +90,7 @@ button { font: inherit; cursor: pointer; }
   max-width: 850px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .badge-ao-vivo {
@@ -133,16 +119,56 @@ button { font: inherit; cursor: pointer; }
 .slogan-sub {
   font-size: clamp(1rem, 2vw, 1.25rem);
   color: #ff9f43;
-  margin-bottom: 35px;
+  margin-bottom: 30px;
   font-weight: 500;
 }
 
-/* Caixa do Botão Play e Estado */
+/* --- CAIXA DE TEXTO DA MÚSICA COM ALTO CONTRASTE --- */
+.glass-card .agora {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  padding: 12px 24px;
+  border-radius: 50px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  margin-top: 20px;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.glass-card #agoraTexto {
+  color: #00d2ff !important; /* Azul neon super legível para o nome da música */
+  font-weight: 600;
+}
+
+/* Ponto verde/vermelho piscante de transmissão */
+.glass-card .ponto {
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #22c55e;
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* Botão Play Moderno */
 .hero-player-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 10px;
   margin-top: 15px;
 }
 
@@ -171,7 +197,7 @@ button { font: inherit; cursor: pointer; }
   height: 36px;
 }
 
-/* Ajustes para telas menores (Telemóveis) */
+/* Ajustes para Telemóveis */
 @media (max-width: 768px) {
   .glass-card {
     padding: 35px 20px;
