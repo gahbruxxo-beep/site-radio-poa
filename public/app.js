@@ -531,18 +531,20 @@
 
   async function buscarCoordenadas(nomeCidade) {
     try {
-      // 1. Tenta buscar com o nome original digitado
+      console.log('Buscando coordenadas para:', nomeCidade);
       let geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomeCidade)}&count=5&language=pt&format=json`;
       let r = await fetch(geoUrl);
       let j = await r.json();
+      console.log('Resposta da API (tentativa 1):', j);
 
-      // 2. Se não encontrar nada, tenta remover os acentos (ex: "são paulo" vira "sao paulo")
       if (!j.results || j.results.length === 0) {
         const nomeLimpo = nomeCidade.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         if (nomeLimpo !== nomeCidade) {
+          console.log('Tentando sem acentos:', nomeLimpo);
           geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomeLimpo)}&count=5&language=pt&format=json`;
           r = await fetch(geoUrl);
           j = await r.json();
+          console.log('Resposta da API (tentativa sem acentos):', j);
         }
       }
 
@@ -554,7 +556,7 @@
         };
       }
     } catch (e) {
-      /* falha na busca de coordenadas */
+      console.error('Erro na requisição da API de geocodificação:', e);
     }
     return null;
   }
