@@ -1,7 +1,7 @@
 {
-  "name": "Rádio online",
-  "short_name": "Rádio",
-  "description": "Rádio ao vivo, notícias de Porto Alegre e região, horóscopo e passatempos.",
+  "name": "Web Rádio Zona Sul",
+  "short_name": "Rádio Zona Sul",
+  "description": "A sua conexão musical e informativa na Zona Sul de Porto Alegre.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
