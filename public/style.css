@@ -78,8 +78,8 @@ button { font: inherit; cursor: pointer; }
   overflow: hidden;
   padding: 40px 20px;
   /* Camada escura suave (0.4) para garantir contraste nos textos, mantendo visível a sua imagem */
-  background: linear-gradient(rgba(6, 9, 19, 0.4), rgba(6, 9, 19, 0.4)), 
-              url('fundo.png') center/cover no-repeat;
+background: linear-gradient(rgba(6, 9, 19, 0.4), rgba(6, 9, 19, 0.4)), 
+            url('/fundo.png') center/cover no-repeat;
 }
 
 /* Garante que o vídeo antigo continue desativado para zero travamentos */
