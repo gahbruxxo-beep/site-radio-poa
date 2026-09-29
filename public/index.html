@@ -55,11 +55,17 @@
 </header>
 
 <main>
-<!-- Abertura: Paisagem Real de Porto Alegre com Efeito Moderno -->
+<!-- Abertura: Fundo com Vídeo Real em Movimento -->
   <section class="hero" id="inicio" aria-label="Rádio ao vivo">
-    <div class="hero-bg-image"></div>
-    <div class="hero-glow-overlay"></div>
+    <!-- Vídeo de fundo em loop automático (coloque um vídeo chamado fundo.mp4 na pasta public do seu projeto) -->
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="fundo.mp4" type="video/mp4">
+      Seu navegador não suporta vídeos de fundo.
+    </video>
     
+    <!-- Camada escura translúcida para dar contraste ao painel -->
+    <div class="hero-overlay"></div>
+
     <div class="hero-in glass-card">
       <div class="badge-ao-vivo">🔴 AO VIVO AGORA</div>
       <h1 class="neon-title">Web Rádio Zona Sul</h1>
