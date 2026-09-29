@@ -58,42 +58,33 @@
 </header>
 
 <main>
-<!-- Abertura: Fundo com Vídeo Real em Movimento -->
-  <section class="hero" id="inicio" aria-label="Rádio ao vivo">
-    <!-- Vídeo de fundo em loop automático (coloque um vídeo chamado fundo.mp4 na pasta public do seu projeto) -->
-    <video class="hero-video" autoplay muted loop playsinline>
-      <source src="fundo.mp4" type="video/mp4">
-      Seu navegador não suporta vídeos de fundo.
-    </video>
+<!-- Abertura: Fundo leve em gradiente otimizado para performance -->
+<section class="hero" id="inicio" aria-label="Rádio ao vivo">
+  <div class="hero-in glass-card">
+    <div class="badge-ao-vivo">🔴 AO VIVO AGORA</div>
     
-    <!-- Camada escura translúcida para dar contraste ao painel -->
-    <div class="hero-overlay"></div>
-
-<div class="hero-in glass-card">
-      <div class="badge-ao-vivo">🔴 AO VIVO AGORA</div>
-      
-      <!-- Logotipo Animado na Seção Hero -->
-      <div style="margin-bottom: 20px;">
-        <img src="logo-poa-animado-completo.gif" alt="Web Rádio Zona Sul Animado" style="max-width: 260px; width: 100%; height: auto; display: block; margin: 0 auto;">
-      </div>
-
-      <h1 class="neon-title">Web Rádio Zona Sul</h1>
-      <p class="slogan-sub">Porto Alegre • A sua conexão musical definitiva</p>
-      
-      <div class="hero-player-box">
-        <button class="sol-btn-modern" id="solBtn" type="button" aria-label="Ouvir a rádio">
-          <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#fff"/></svg>
-          <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/></svg>
-          <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
-        </button>
-        <p class="agora" aria-live="polite">
-          <span class="ponto" aria-hidden="true"></span>
-          <span id="agoraTexto">Toque no botão para ouvir a transmissão</span>
-        </p>
-      </div>
+    <!-- Logotipo Animado na Seção Hero -->
+    <div style="margin-bottom: 20px;">
+      <img src="logo-poa-animado-completo.gif" alt="Web Rádio Zona Sul Animado" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto;" width="220" height="100">
     </div>
-    <p class="hero-aviso" id="heroAviso" role="status"></p>
-  </section>
+
+    <h1 class="neon-title">Web Rádio Zona Sul</h1>
+    <p class="slogan-sub">Porto Alegre • A sua conexão musical definitiva</p>
+    
+    <div class="hero-player-box">
+      <button class="sol-btn-modern" id="solBtn" type="button" aria-label="Ouvir a rádio">
+        <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#fff"/></svg>
+        <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/></svg>
+        <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
+      </button>
+      <p class="agora" aria-live="polite">
+        <span class="ponto" aria-hidden="true"></span>
+        <span id="agoraTexto">Toque no botão para ouvir a transmissão</span>
+      </p>
+    </div>
+  </div>
+  <p class="hero-aviso" id="heroAviso" role="status"></p>
+</section>
   <!-- Notícias -->
   <section class="secao" id="noticias">
     <div class="secao-in">
