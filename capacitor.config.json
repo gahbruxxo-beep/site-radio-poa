@@ -1,0 +1,14 @@
+{
+  "appId": "com.webradiozonasulpoa.tv",
+  "appName": "Web Rádio Zona Sul",
+  "webDir": "public",
+  "server": {
+    "url": "https://webradiozonasulpoa.onrender.com",
+    "cleartext": true
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK"
+    }
+  }
+}
