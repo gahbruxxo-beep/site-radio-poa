@@ -508,6 +508,9 @@
   /* ============================================================== */
   /* Clima                                                           */
   /* ============================================================== */
+  /* ============================================================== */
+  /* Clima com Pesquisa de Cidades                                  */
+  /* ============================================================== */
   function descreverClima(cod) {
     if (cod === 0) return ['☀️', 'Céu limpo'];
     if (cod === 1) return ['🌤️', 'Poucas nuvens'];
@@ -522,20 +525,114 @@
     return ['🌡️', 'Tempo instável'];
   }
 
-  async function carregarClima() {
+  let cidadeAtual = ler('sr_clima_cidade') || 'Porto Alegre';
+  let latAtual = parseFloat(ler('sr_clima_lat')) || -30.0331;
+  let lonAtual = parseFloat(ler('sr_clima_lon')) || -51.23;
+
+  async function buscarCoordenadas(nomeCidade) {
+    try {
+      const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomeCidade)}&count=1&language=pt&format=json`;
+      const r = await fetch(geoUrl);
+      const j = await r.json();
+      if (j.results && j.results.length > 0) {
+        return {
+          lat: j.results[0].latitude,
+          lon: j.results[0].longitude,
+          nome: `${j.results[0].name}${j.results[0].admin1 ? ' - ' + j.results[0].admin1 : ''}`
+        };
+      }
+    } catch (e) {
+      /* falha na busca de coordenadas */
+    }
+    return null;
+  }
+
+  async function carregarClima(nomeParaBuscar) {
     const box = $('#clima') || $('#tempo') || $('.tempo-container');
     if (!box) return;
+
+    if (nomeParaBuscar) {
+      const coords = await buscarCoordenadas(nomeParaBuscar);
+      if (coords) {
+        cidadeAtual = coords.nome;
+        latAtual = coords.lat;
+        lonAtual = coords.lon;
+        guardar('sr_clima_cidade', cidadeAtual);
+        guardar('sr_clima_lat', latAtual);
+        guardar('sr_clima_lon', lonAtual);
+      } else {
+        alert('Cidade não encontrada. Verifique o nome e tente novamente.');
+        return;
+      }
+    }
+
     try {
-      // Coordenadas fixas e diretas de Porto Alegre para evitar travamentos na Render
-      const url = 'https://open-meteo.com' +
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${latAtual}&longitude=${lonAtual}` +
         '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
         '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
         '&timezone=America%2FSao_Paulo&forecast_days=5';
+      
       const r = await fetch(url);
       if (!r.ok) throw new Error('clima');
       const j = await r.json();
       const [emoji, desc] = descreverClima(j.current.weather_code);
-      box.replaceChildren();
+
+      // Cria a barra de pesquisa apenas uma vez para não perder o foco ao atualizar
+      let conteudoClima = $('#conteudoClimaDados');
+      if (!conteudoClima) {
+        box.replaceChildren();
+        
+        const barraBusca = el('div', 'clima-busca');
+        barraBusca.style.cssText = 'display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center;';
+        
+        const input = el('input', 'input-cidade');
+        input.type = 'text';
+        input.id = 'inputCidadeSearch';
+        input.placeholder = 'Digite outra cidade...';
+        input.value = cidadeAtual;
+        input.style.cssText = 'padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; flex: 1; max-width: 250px;';
+
+        const btn = el('button', 'btn-busca-cidade', 'Pesquisar');
+        btn.type = 'button';
+        btn.style.cssText = 'padding: 8px 16px; border-radius: 6px; border: none; background: #0f172a; color: #fff; cursor: pointer; font-weight: bold;';
+
+        const executarBusca = () => {
+          const val = $('#inputCidadeSearch').value.trim();
+          if (val) {
+            btn.textContent = 'Buscando...';
+            btn.disabled = true;
+            carregarClima(val).finally(() => {
+              btn.textContent = 'Pesquisar';
+              btn.disabled = false;
+            });
+          }
+        };
+
+        btn.addEventListener('click', executarBusca);
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') executarBusca();
+        });
+
+        barraBusca.appendChild(input);
+        barraBusca.appendChild(btn);
+        box.appendChild(barraBusca);
+
+        conteudoClima = el('div');
+        conteudoClima.id = 'conteudoClimaDados';
+        box.appendChild(conteudoClima);
+      } else {
+        const input = $('#inputCidadeSearch');
+        if (input && document.activeElement !== input) {
+          input.value = cidadeAtual;
+        }
+        conteudoClima.replaceChildren();
+      }
+
+      // Exibe o local atual
+      const pLocal = el('p', 'clima-local');
+      pLocal.style.cssText = 'font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; text-align: center;';
+      pLocal.textContent = `📍 Previsão para: ${cidadeAtual}`;
+      conteudoClima.appendChild(pLocal);
 
       const agora = el('div', 'clima-agora');
       agora.appendChild(el('span', 'emoji', emoji));
@@ -544,7 +641,7 @@
       info.appendChild(el('p', 'desc', desc));
       info.appendChild(el('p', 'detalhe', 'Sensação de ' + Math.round(j.current.apparent_temperature) + '°, umidade ' + j.current.relative_humidity_2m + '%, vento de ' + Math.round(j.current.wind_speed_10m) + ' km/h'));
       agora.appendChild(info);
-      box.appendChild(agora);
+      conteudoClima.appendChild(agora);
 
       const dias = el('div', 'clima-dias');
       j.daily.time.forEach((t, i) => {
@@ -557,9 +654,12 @@
         dia.appendChild(el('p', 'chuva', 'chuva ' + (j.daily.precipitation_probability_max[i] ?? 0) + '%'));
         dias.appendChild(dia);
       });
-      box.appendChild(dias);
+      conteudoClima.appendChild(dias);
     } catch (e) {
-      box.replaceChildren(el('p', 'nota', 'Não consegui carregar a previsão agora. Tente recarregar a página em alguns instantes.'));
+      const conteudoClima = $('#conteudoClimaDados');
+      if (conteudoClima) {
+        conteudoClima.replaceChildren(el('p', 'nota', 'Não consegui carregar a previsão agora. Tente novamente em instantes.'));
+      }
     }
   }
 
