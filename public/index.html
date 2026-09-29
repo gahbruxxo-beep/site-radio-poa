@@ -55,68 +55,32 @@
 </header>
 
 <main>
-  <!-- Abertura: o sol é o botão de ouvir a rádio -->
+<!-- Abertura: Design Moderno com Efeito Glassmorphism -->
   <section class="hero" id="inicio" aria-label="Rádio ao vivo">
-    <div class="hero-in">
+    <div class="hero-glow-bg"></div>
+    <div class="hero-in glass-card">
       <div class="hero-texto">
-<h1 style="color: #00d2ff; text-shadow: 0 0 10px #00d2ff;">Web Rádio Zona Sul</h1>
-<p style="color: #ff7b00; font-style: italic;">Porto Alegre - A sua conexão musical!</p>
-
-        <p class="agora" aria-live="polite"><span class="ponto" aria-hidden="true"></span><span id="agoraTexto">Toque na estação para ouvir
+        <span class="badge-ao-vivo">🔴 AO VIVO AGORA</span>
+        <h1 class="neon-title">Web Rádio Zona Sul</h1>
+        <p class="slogan-sub">Porto Alegre • A sua conexão musical definitiva</p>
+        
+        <p class="agora" aria-live="polite">
+          <span class="ponto" aria-hidden="true"></span>
+          <span id="agoraTexto">Toque no botão abaixo para curtir o som</span>
+        </p>
       </div>
 
-      <div class="escena">
-        <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-          <defs>
-            <clipPath id="ceu"><rect x="0" y="0" width="900" height="250"/></clipPath>
-          </defs>
-          <!-- céu em faixas -->
-          <rect width="900" height="130" fill="#1B2140"/>
-          <rect y="130" width="900" height="60" fill="#3A2C5E"/>
-          <rect y="190" width="900" height="35" fill="#B54A78"/>
-          <rect y="225" width="900" height="25" fill="#F08A45"/>
-          <!-- sol -->
-          <circle cx="630" cy="250" r="80" fill="#FFC145" clip-path="url(#ceu)"/>
-          <!-- silhueta da Usina do Gasômetro -->
-          <g fill="#1B2140">
-            <rect x="58" y="196" width="9" height="54"/>
-            <rect x="55" y="192" width="15" height="6"/>
-            <rect x="74" y="226" width="96" height="24"/>
-            <rect x="82" y="216" width="12" height="10"/>
-            <rect x="112" y="220" width="20" height="6"/>
-          </g>
-          <!-- rio -->
-          <rect y="250" width="900" height="170" fill="#24506A"/>
-          <g class="rio-linhas" stroke="#4C86A0" stroke-width="2" stroke-linecap="round">
-            <line x1="40" y1="272" x2="150" y2="272"/>
-            <line x1="220" y1="290" x2="360" y2="290"/>
-            <line x1="90" y1="318" x2="200" y2="318"/>
-            <line x1="380" y1="336" x2="470" y2="336"/>
-            <line x1="740" y1="282" x2="860" y2="282"/>
-            <line x1="700" y1="330" x2="800" y2="330"/>
-            <line x1="520" y1="380" x2="660" y2="380"/>
-            <line x1="120" y1="368" x2="260" y2="368"/>
-          </g>
-          <!-- reflexo do sol -->
-          <g fill="#FFC145" class="reflexo">
-            <rect x="555" y="260" width="150" height="7" rx="3.5"/>
-            <rect x="568" y="276" width="124" height="7" rx="3.5" opacity=".9"/>
-            <rect x="580" y="292" width="100" height="7" rx="3.5" opacity=".8"/>
-            <rect x="592" y="309" width="76" height="6" rx="3" opacity=".7"/>
-            <rect x="603" y="327" width="54" height="6" rx="3" opacity=".6"/>
-            <rect x="613" y="347" width="34" height="5" rx="2.5" opacity=".5"/>
-          </g>
-        </svg>
-        <button class="sol-btn" id="solBtn" type="button" aria-label="Ouvir a rádio">
-          <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#1B2140"/></svg>
-          <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/></svg>
-          <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#1B2140" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
+      <div class="hero-actions">
+        <button class="sol-btn-modern" id="solBtn" type="button" aria-label="Ouvir a rádio">
+          <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#fff"/></svg>
+          <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/></svg>
+          <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
         </button>
+        <span class="play-label-tip">Aperte para reproduzir</span>
       </div>
     </div>
     <p class="hero-aviso" id="heroAviso" role="status"></p>
   </section>
-
   <!-- Notícias -->
   <section class="secao" id="noticias">
     <div class="secao-in">
