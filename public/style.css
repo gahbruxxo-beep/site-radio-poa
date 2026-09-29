@@ -78,18 +78,40 @@ body[data-radio="tocando"] .ponto { background: #FF5A5F; animation: pulsa 1.6s e
 .escena { position: relative; aspect-ratio: 900 / 420; width: 100%; }
 .escena > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-.sol-btn {
-  position: absolute;
-  left: 61.1%; top: 40.5%; width: 17.8%; height: 19%;
-  border: 0; padding: 0; background: transparent;
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, .4);
-  transition: background .2s, box-shadow .2s;
+/* Botão Play Estilo Rádio Tecnológica Neon */
+.sol, #botao-play, .player-central {
+    background: radial-gradient(circle, #1a2a6c, #272c30);
+    border: 4px solid #00d2ff;
+    box-shadow: 0 0 20px #00d2ff, inset 0 0 15px #00d2ff;
+    border-radius: 50%;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    animation: pulsoNeon 2s infinite alternate;
 }
-.sol-btn::after { content: ""; position: absolute; inset: -16px -10px -4px; }
-.sol-btn:hover { background: rgba(255, 255, 255, .22); box-shadow: 0 0 0 4px rgba(255, 255, 255, .7); }
-.sol-btn svg { height: 62%; width: auto; }
+
+.sol:hover, #botao-play:hover {
+    transform: scale(1.08) rotate(5deg);
+    border-color: #ff7b00;
+    box-shadow: 0 0 35px #ff7b00, inset 0 0 20px #ff7b00;
+}
+
+/* Ícone de fone de ouvido/play dentro do botão */
+.sol::after, #botao-play::after {
+    content: "📻";
+    font-size: 4.5rem;
+    filter: drop-shadow(0 0 10px #00d2ff);
+}
+
+@keyframes pulsoNeon {
+    0% { box-shadow: 0 0 15px #00d2ff, inset 0 0 10px #00d2ff; }
+    100% { box-shadow: 0 0 30px #00d2ff, inset 0 0 20px #00d2ff; }
+}
+
 
 .hero-aviso { text-align: center; padding: 0 20px 14px; min-height: 0; color: #FFD9A0; font-weight: 500; }
 .hero-aviso:empty { display: none; }
