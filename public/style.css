@@ -67,7 +67,6 @@ button { font: inherit; cursor: pointer; }
 }
 .menu a:hover { background: rgba(255, 255, 255, .12); }
 
-/* --- HERO COM A SUA IMAGEM PERSONALIZADA (fundo.png) --- */
 .hero {
   position: relative;
   min-height: 85vh;
@@ -77,9 +76,8 @@ button { font: inherit; cursor: pointer; }
   justify-content: center;
   overflow: hidden;
   padding: 40px 20px;
-  /* Camada escura suave (0.4) para garantir contraste nos textos, mantendo visível a sua imagem */
-background: linear-gradient(rgba(6, 9, 19, 0.4), rgba(6, 9, 19, 0.4)), 
-            url('/fundo.png') center/cover no-repeat;
+  background: linear-gradient(rgba(6, 9, 19, 0.4), rgba(6, 9, 19, 0.4)), 
+              url('fundo.png') center/cover no-repeat;
 }
 
 /* Garante que o vídeo antigo continue desativado para zero travamentos */
