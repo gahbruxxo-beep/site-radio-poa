@@ -473,7 +473,10 @@ select:focus, input:focus, textarea:focus { border-color: var(--rio); outline: n
 .volume input { width: 110px; accent-color: var(--sol); }
 @media (max-width: 560px) { .volume { display: none; } }
 @media (max-width: 420px) { .player-ouvintes { display: none; } }
-
+/* Impede que o controle de volume prenda o foco do D-Pad na TV */
+input[type="range"] {
+  pointer-events: none;
+}
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
