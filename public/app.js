@@ -67,7 +67,7 @@
       estadoTxt = 'Sem sinal';
       musicaTxt = 'Toque para tentar de novo';
     } else {
-      hero = 'Toque no sol para ouvir';
+      hero = 'Aperte o play para curtir o som';
       estadoTxt = 'Parada';
       musicaTxt = 'Toque para ouvir';
     }
