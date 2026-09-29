@@ -351,7 +351,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   'font-src https://fonts.gstatic.com',
   "img-src 'self' data:",
-  "connect-src 'self' https://api.open-meteo.com",
+"connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com",
   'media-src *',
   "frame-ancestors 'self'",
 ].join('; ');
