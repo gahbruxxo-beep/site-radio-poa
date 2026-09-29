@@ -12,7 +12,8 @@
     return e;
   };
   async function api(url, opcoes) {
-    const r = await fetch(url, opcoes);
+  const URL_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : window.location.origin;
+    const r = await fetch(url.startsWith('http') ? url : URL_BASE + url, opcoes);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.erro || 'Erro ' + r.status);
     return j;
