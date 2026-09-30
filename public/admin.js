@@ -14,13 +14,18 @@
   }
 
   async function carregarOuvintesAdmin() {
+    if (document.hidden) return;
     try {
-      const d = await chamar('/api/aovivo');
-      const box = $('#playerOuvintes');
+      const d = await chamar('/api/admin/ouvintes');
+      const box = $('#adminOuvintes');
       if (box) {
         box.textContent = (d.ouvintes !== null && d.ouvintes !== undefined) ? d.ouvintes : '0';
       }
-    } catch (e) {}
+    } catch (e) {
+      if (e.message && (e.message.includes('401') || e.message.includes('Sua sessão'))) {
+        mostrarLogin('Sua sessão terminou. Entre novamente.');
+      }
+    }
   }
 
   async function carregar() {

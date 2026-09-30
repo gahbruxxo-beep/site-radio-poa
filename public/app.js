@@ -1,29 +1,7 @@
 (() => {
   'use strict';
 
-  // Helper tolerante: nunca retorna null, previne TypeErrors caso IDs estejam ausentes
-  const noopProxy = new Proxy({}, {
-    get: (target, prop) => {
-      if (prop === 'then') return undefined;
-      return () => noopProxy;
-    },
-    set: () => true
-  });
-
-  const $ = (s, r = document) => {
-    const el = r.querySelector(s);
-    if (!el) {
-      return new Proxy({}, {
-        get: (target, prop) => {
-          if (prop === 'textContent' || prop === 'value' || prop === 'innerHTML') return '';
-          if (prop === 'hidden' || prop === 'disabled') return false;
-          return () => noopProxy;
-        },
-        set: () => true
-      });
-    }
-    return el;
-  };
+  const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
   const ler = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -195,31 +173,11 @@
   $('#solBtn').addEventListener('click', alternar);
   $('#playerBtn').addEventListener('click', alternar);
 
-  const volInput = $('#volume');
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    const volContainer = $('.volume');
-    if (volContainer && volContainer.style) volContainer.style.display = 'none';
-  } else {
-    const volSalvo = parseFloat(ler('sr_volume'));
-    if (!isNaN(volSalvo)) volInput.value = volSalvo;
-    audio.volume = parseFloat(volInput.value || 0.8);
-    volInput.addEventListener('input', () => {
-      audio.volume = parseFloat(volInput.value);
-      guardar('sr_volume', volInput.value);
-    });
-  }
-
   async function atualizarAoVivo() {
     if (document.hidden) return;
     try {
       const d = await api('/api/aovivo');
       musicaAtual = d.musica || null;
-      const box = $('#playerOuvintes');
-      if (d.ouvintes !== null && d.ouvintes !== undefined) {
-        box.textContent = d.ouvintes + (d.ouvintes === 1 ? ' ouvinte' : ' ouvintes');
-        box.hidden = false;
-      } else box.hidden = true;
       atualizarTextosRadio();
     } catch (e) {}
   }
@@ -453,6 +411,7 @@
   function mostrarHoroscopo(signo) {
     const h = montarHoroscopo(signo);
     const box = $('#horoscopoBox');
+    if (!box) return;
     box.replaceChildren();
     const cab = el('div', 'horo-cab');
     cab.appendChild(el('span', 'horo-simb', signo.s));
@@ -495,11 +454,15 @@
     $$('.signo').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'));
     guardar('sr_signo', id);
     mostrarHoroscopo(s);
-    if (rolar) $('#horoscopoBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (rolar) {
+      const hBox = $('#horoscopoBox');
+      if (hBox) hBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   function iniciarHoroscopo() {
     const box = $('#signos');
+    if (!box) return;
     SIGNOS.forEach((s) => {
       const b = el('button', 'signo');
       b.type = 'button';
@@ -514,22 +477,27 @@
 
     const dias = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-    for (let d = 1; d <= 31; d++) $('#selDia').appendChild(new Option(d, d));
-    meses.forEach((m, i) => $('#selMes').appendChild(new Option(m, i + 1)));
+    const selDia = $('#selDia');
+    const selMes = $('#selMes');
+    if (selDia) for (let d = 1; d <= 31; d++) selDia.appendChild(new Option(d, d));
+    if (selMes) meses.forEach((m, i) => selMes.appendChild(new Option(m, i + 1)));
 
-    $('#btnDescobrir').addEventListener('click', () => {
-      const d = parseInt($('#selDia').value, 10);
-      const m = parseInt($('#selMes').value, 10);
-      const resp = $('#descobrirResp');
-      if (d > dias[m - 1]) {
-        resp.textContent = 'Essa data não existe. Confira o dia e o mês.';
-        return;
-      }
-      const v = m * 100 + d;
-      const s = SIGNOS.find((x) => (x.ini <= x.fim ? v >= x.ini && v <= x.fim : v >= x.ini || v <= x.fim));
-      resp.textContent = 'Seu signo é ' + s.nome + '.';
-      selecionarSigno(s.id, true);
-    });
+    const btnDescobrir = $('#btnDescobrir');
+    if (btnDescobrir) {
+      btnDescobrir.addEventListener('click', () => {
+        const d = parseInt($('#selDia').value, 10);
+        const m = parseInt($('#selMes').value, 10);
+        const resp = $('#descobrirResp');
+        if (d > dias[m - 1]) {
+          if (resp) resp.textContent = 'Essa data não existe. Confira o dia e o mês.';
+          return;
+        }
+        const v = m * 100 + d;
+        const s = SIGNOS.find((x) => (x.ini <= x.fim ? v >= x.ini && v <= x.fim : v >= x.ini || v <= x.fim));
+        if (resp) resp.textContent = 'Seu signo é ' + s.nome + '.';
+        selecionarSigno(s.id, true);
+      });
+    }
 
     const salvo = ler('sr_signo');
     if (salvo) selecionarSigno(salvo, false);
@@ -544,7 +512,7 @@
     if (cod === 2) return ['⛅', 'Parcialmente nublado'];
     if (cod === 3) return ['☁️', 'Nublado'];
     if (cod === 45 || cod === 48) return ['🌫️', 'Neblina'];
-    if (cod >= 51 && cod <= 55) return ['🌦️️', 'Garoa'];
+    if (cod >= 51 && cod <= 55) return ['🌦', 'Garoa'];
     if (cod === 56 || cod === 57) return ['🌧️', 'Garoa congelante'];
     if (cod >= 61 && cod <= 65) return ['🌧️', 'Chuva'];
     if (cod === 66 || cod === 67) return ['🌧️', 'Chuva congelante'];
@@ -616,7 +584,11 @@
         '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
         '&timezone=America%2FSao_Paulo&forecast_days=5';
       
-      const r = await fetch(url);
+      const ctl = new AbortController();
+      const timeoutId = setTimeout(() => ctl.abort(), 8000);
+      const r = await fetch(url, { signal: ctl.signal });
+      clearTimeout(timeoutId);
+
       if (!r.ok) throw new Error('clima');
       const j = await r.json();
       const [emoji, desc] = descreverClima(j.current.weather_code);
@@ -694,6 +666,7 @@
       });
       conteudoClima.appendChild(dias);
     } catch (e) {
+      console.error('Erro ao carregar clima:', e);
       box.replaceChildren();
       const erroBox = el('div', 'vazio');
       erroBox.appendChild(el('p', '', 'Não consegui carregar a previsão do tempo.'));
@@ -743,7 +716,8 @@
     const dia = Math.floor(Date.now() / 86400000);
     gIdx = dia % GAUCHES.length;
     mostrarGauches();
-    $('#gOutra').addEventListener('click', () => { gIdx++; mostrarGauches(); });
+    const gOutra = $('#gOutra');
+    if (gOutra) gOutra.addEventListener('click', () => { gIdx++; mostrarGauches(); });
   }
 
   const PERGUNTAS = [
@@ -770,6 +744,7 @@
 
   function desenharQuiz() {
     const box = $('#quizCorpo');
+    if (!box) return;
     box.replaceChildren();
     if (quiz.atual >= quiz.perguntas.length) {
       const n = quiz.pontos;
@@ -839,6 +814,7 @@
 
   function desenharForca() {
     const box = $('#forcaCorpo');
+    if (!box) return;
     box.replaceChildren();
     const f = forca;
     const ganhou = [...f.palavra].every((l) => f.usadas.has(l));
@@ -890,33 +866,43 @@
   /* ============================================================== */
   /* Pedidos                                                         */
   /* ============================================================== */
-  $('#formPedido').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const resp = $('#pResp');
-    resp.className = '';
-    const texto = $('#pTexto').value.trim();
-    if (texto.length < 3) {
-      resp.className = 'erro';
-      resp.textContent = 'Escreva a música ou o recado antes de enviar.';
-      return;
-    }
-    try {
-      await api('/api/pedido', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: $('#pNome').value,
-          texto,
-          tipo: $('input[name="tipo"]:checked').value,
-        }),
-      });
-      resp.textContent = 'Enviado! Sua mensagem chegou para a equipe da rádio.';
-      $('#pTexto').value = '';
-    } catch (e) {
-      resp.className = 'erro';
-      resp.textContent = e.message;
-    }
-  });
+  const formPedido = $('#formPedido');
+  if (formPedido) {
+    formPedido.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const resp = $('#pResp');
+      if (resp) resp.className = '';
+      const pTexto = $('#pTexto');
+      const texto = pTexto ? pTexto.value.trim() : '';
+      if (texto.length < 3) {
+        if (resp) {
+          resp.className = 'erro';
+          resp.textContent = 'Escreva a música ou o recado antes de enviar.';
+        }
+        return;
+      }
+      try {
+        const pNome = $('#pNome');
+        const tipoInput = $('input[name="tipo"]:checked');
+        await api('/api/pedido', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome: pNome ? pNome.value : '',
+            texto,
+            tipo: tipoInput ? tipoInput.value : 'musica',
+          }),
+        });
+        if (resp) resp.textContent = 'Enviado! Sua mensagem chegou para a equipe da rádio.';
+        if (pTexto) pTexto.value = '';
+      } catch (e) {
+        if (resp) {
+          resp.className = 'erro';
+          resp.textContent = e.message;
+        }
+      }
+    });
+  }
 
   /* ============================================================== */
   /* Início imediato com retentativas inteligentes para Notícias     */

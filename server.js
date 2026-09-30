@@ -293,7 +293,6 @@ const DURACAO_SESSAO_ADMIN = 12 * 60 * 60 * 1000;
 const JANELA_TENTATIVAS_ADMIN = 15 * 60 * 1000;
 const MAX_TENTATIVAS_ADMIN = 8;
 
-// Limpeza periódica dos Maps para evitar crescimento ilimitado de memória
 setInterval(() => {
   const agora = Date.now();
   for (const [ip, ts] of ultimoPedidoPorIp) {
@@ -516,7 +515,8 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     if (rota === '/api/aovivo' && req.method === 'GET') {
-      return responderJson(res, 200, await lerAoVivo());
+      const d = await lerAoVivo();
+      return responderJson(res, 200, { musica: d.musica });
     }
 
     if (rota === '/api/pedido' && req.method === 'POST') {
@@ -583,6 +583,12 @@ const servidor = http.createServer(async (req, res) => {
 
     if (rota.startsWith('/api/admin/')) {
       if (!sessaoAdminValida(req)) return responderJson(res, 401, { erro: 'Entre novamente para acessar o painel.' });
+      
+      if (rota === '/api/admin/ouvintes' && req.method === 'GET') {
+        const d = await lerAoVivo();
+        return responderJson(res, 200, { ouvintes: d.ouvintes });
+      }
+
       if (rota === '/api/admin/pedidos' && req.method === 'GET') {
         const resSup = await lerPedidos();
         if (resSup.erro) return responderJson(res, 503, { erro: 'Não foi possível carregar os pedidos do banco de dados.' });

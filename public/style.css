@@ -390,11 +390,6 @@ select:focus, input:focus, textarea:focus { border-color: var(--rio); outline: n
 .player-info { min-width: 0; flex: 1; }
 .player-estado { font-size: .8rem; color: #B9B3D0; }
 .player-musica { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-lado { display: flex; align-items: center; gap: 16px; }
-.player-ouvintes { font-size: .85rem; color: #B9B3D0; white-space: nowrap; }
-.volume input { width: 110px; accent-color: var(--sol); }
-@media (max-width: 560px) { .volume { display: none; } }
-@media (max-width: 420px) { .player-ouvintes { display: none; } }
 
 /* Estilos do painel admin */
 .admin-stat-card {
