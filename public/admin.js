@@ -12,6 +12,17 @@
     $('#area').hidden = true;
     $('#erro').textContent = mensagem;
   }
+
+  async function carregarOuvintesAdmin() {
+    try {
+      const d = await chamar('/api/aovivo');
+      const box = $('#playerOuvintes');
+      if (box) {
+        box.textContent = (d.ouvintes !== null && d.ouvintes !== undefined) ? d.ouvintes : '0';
+      }
+    } catch (e) {}
+  }
+
   async function carregar() {
     const d = await chamar('/api/admin/pedidos');
     $('#login').hidden = true;
@@ -23,12 +34,13 @@
     d.pedidos.forEach((p) => {
       const box = document.createElement('div');
       box.className = 'pedido ' + p.tipo;
+      box.style.cssText = 'background: #fff; border-left: 6px solid ' + (p.tipo === 'musica' ? '#FFC145' : '#24506A') + '; padding: 12px 16px; margin-bottom: 12px; border-radius: 4px;';
       const topo = document.createElement('div');
-      topo.className = 'topo';
-      const t = Object.assign(document.createElement('span'), { className: 'tipo', textContent: (p.tipo === 'musica' ? 'Pedido de música' : 'Recado') + ' de ' + p.nome });
+      topo.style.cssText = 'display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .9rem; color: #4A5270;';
+      const t = Object.assign(document.createElement('span'), { style: 'font-weight: 700; color: #1B2140;', textContent: (p.tipo === 'musica' ? 'Pedido de música' : 'Recado') + ' de ' + p.nome });
       const quando = Object.assign(document.createElement('span'), { textContent: new Date(p.data).toLocaleString('pt-BR') });
       topo.append(t, quando);
-      const txt = Object.assign(document.createElement('p'), { textContent: p.texto });
+      const txt = Object.assign(document.createElement('p'), { style: 'margin: 6px 0 10px; white-space: pre-wrap; overflow-wrap: anywhere;', textContent: p.texto });
       const apagar = Object.assign(document.createElement('button'), { className: 'sec', type: 'button', textContent: 'Já li, apagar' });
       apagar.addEventListener('click', async () => {
         try { await chamar('/api/admin/pedidos/' + p.id, { method: 'DELETE' }); await carregar(); } catch (e) { alert(e.message); }
@@ -36,7 +48,9 @@
       box.append(topo, txt, apagar);
       lista.appendChild(box);
     });
+    carregarOuvintesAdmin();
   }
+
   $('#login').addEventListener('submit', async (e) => {
     e.preventDefault();
     const senha = $('#senha').value;
@@ -49,6 +63,8 @@
   });
   $('#atualizar').addEventListener('click', () => carregar().catch((e) => mostrarLogin(e.message)));
   $('#sair').addEventListener('click', async () => { await chamar('/api/admin/logout', { method: 'POST' }).catch(() => {}); mostrarLogin(); });
+  
   carregar().catch(() => mostrarLogin());
-  setInterval(() => { if (!$('#area').hidden) carregar().catch(() => mostrarLogin('Sua sessão terminou. Entre novamente.')); }, 30000);
+  setInterval(() => { if (!$('#area').hidden) { carregar().catch(() => mostrarLogin('Sua sessão terminou. Entre novamente.')); } }, 30000);
+  setInterval(() => { if (!$('#area').hidden) { carregarOuvintesAdmin(); } }, 20000);
 })();

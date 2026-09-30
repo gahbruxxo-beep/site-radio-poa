@@ -5,39 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Painel de pedidos</title>
-  <style>
-    body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #F2F4F8; color: #1B2140; line-height: 1.5; }
-    header { background: #1B2140; color: #FFC145; padding: 14px 20px; font-weight: 800; font-size: 1.2rem; }
-    main { max-width: 760px; margin: 0 auto; padding: 24px 20px 60px; }
-    form, .barra { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
-    input { font: inherit; padding: 9px 12px; border: 2px solid #D5DBE6; border-radius: 10px; }
-    button { font: inherit; font-weight: 700; padding: 9px 18px; border-radius: 999px; border: 2px solid #1B2140; background: #FFC145; border-color: #FFC145; cursor: pointer; }
-    button.sec { background: transparent; border-color: #1B2140; }
-    .pedido { background: #fff; border-left: 6px solid #24506A; padding: 12px 16px; margin-bottom: 12px; border-radius: 4px; }
-    .pedido.musica { border-left-color: #FFC145; }
-    .pedido .topo { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .9rem; color: #4A5270; }
-    .pedido .tipo { font-weight: 700; color: #1B2140; }
-    .pedido p { margin: 6px 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .erro { color: #B5384A; font-weight: 700; }
-  </style>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <header>Painel de pedidos e recados</header>
-<main>
+<main style="max-width: 760px; margin: 0 auto; padding: 24px 20px 60px;">
   <form id="login">
     <input type="password" id="senha" placeholder="Senha do painel" autocomplete="current-password">
     <button type="submit">Entrar</button>
     <span id="erro" class="erro"></span>
   </form>
   <div id="area" hidden>
-    <div class="barra">
+    <div class="barra" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;">
       <button class="sec" id="atualizar" type="button">Atualizar lista</button>
       <button class="sec" id="sair" type="button">Sair</button>
       <span id="contagem"></span>
       <div class="admin-stat-card">
-    <h3>Ouvintes Ao Vivo</h3>
-    <span id="playerOuvintes" class="admin-numero">0</span>
-</div>
+        <h3>Ouvintes Ao Vivo</h3>
+        <span id="playerOuvintes" class="admin-numero">0</span>
+      </div>
     </div>
     <div id="lista"></div>
   </div>

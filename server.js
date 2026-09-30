@@ -2,7 +2,6 @@
 /*
  * SiteRadio - servidor
  * Não precisa instalar nada além do Node.js (versão 18 ou mais nova).
- * Para ligar: dê dois cliques em "iniciar.bat" (Windows).
  */
 const http = require('http');
 const fs = require('fs');
@@ -24,7 +23,7 @@ function lerJson(arq, padrao) {
 
 const config = lerJson(path.join(RAIZ, 'config.json'), null);
 if (!config) {
-  console.error('ERRO: não consegui ler o arquivo config.json. Confira se ele está na mesma pasta e sem erros de digitação.');
+  console.error('ERRO: não consegui ler o arquivo config.json.');
   process.exit(1);
 }
 const PORTA = Number(process.env.PORT) || config.porta || 3000;
@@ -87,6 +86,12 @@ function chaveTitulo(t) {
     .slice(0, 60);
 }
 
+function pegarIp(req) {
+  const xf = req.headers['x-forwarded-for'];
+  if (xf) return xf.split(',')[0].trim();
+  return req.socket.remoteAddress || '?';
+}
+
 /* ------------------------------------------------------------------ */
 /* Notícias (leitura de feeds RSS)                                     */
 /* ------------------------------------------------------------------ */
@@ -119,7 +124,7 @@ function urlGoogleNews(consulta) {
   );
 }
 
-const cacheNoticias = {}; // id -> { ts, itens, erro }
+const cacheNoticias = {};
 let ultimaForcada = 0;
 
 async function atualizarCategoria(cat) {
@@ -161,7 +166,7 @@ async function atualizarTudo() {
     try {
       await atualizarCategoria(cat);
     } catch (e) {
-      /* segue para a próxima */
+      // segue
     }
   }
   resumoCache = null;
@@ -195,7 +200,7 @@ function listarNoticias(catId, periodo) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Resumo do dia por I.A. (opcional)                                   */
+/* Resumo do dia por I.A.                                              */
 /* ------------------------------------------------------------------ */
 let resumoCache = null;
 
@@ -230,13 +235,12 @@ async function gerarResumo() {
     resumoCache = { ts: Date.now(), texto };
     return { ativo: true, texto };
   } catch (e) {
-    console.log('[resumo] não consegui gerar o resumo:', e.message);
     return { ativo: true, texto: null };
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* "No ar agora" (título da música e ouvintes)                          */
+/* "No ar agora"                                                       */
 /* ------------------------------------------------------------------ */
 let aoVivoCache = { ts: 0, dados: { musica: null, ouvintes: null } };
 
@@ -272,7 +276,7 @@ async function lerAoVivo() {
       };
       if (dados.musica || dados.ouvintes !== null) break;
     } catch (e) {
-      /* tenta o próximo formato */
+      // próximo
     }
   }
   aoVivoCache = { ts: Date.now(), dados };
@@ -289,22 +293,34 @@ const DURACAO_SESSAO_ADMIN = 12 * 60 * 60 * 1000;
 const JANELA_TENTATIVAS_ADMIN = 15 * 60 * 1000;
 const MAX_TENTATIVAS_ADMIN = 8;
 
+// Limpeza periódica dos Maps para evitar crescimento ilimitado de memória
+setInterval(() => {
+  const agora = Date.now();
+  for (const [ip, ts] of ultimoPedidoPorIp) {
+    if (agora - ts > 120000) ultimoPedidoPorIp.delete(ip);
+  }
+  for (const [ip, reg] of tentativasAdminPorIp) {
+    if (agora - reg.inicio > 1800000) tentativasAdminPorIp.delete(ip);
+  }
+}, 600000);
+
 const SUPABASE_URL = process.env.SUPABASE_URL || (config.supabase && config.supabase.url);
 const SUPABASE_KEY = process.env.SUPABASE_KEY || (config.supabase && config.supabase.chave);
 
 async function lerPedidos() {
-  if (!SUPABASE_URL || !SUPABASE_KEY) return [];
+  if (!SUPABASE_URL || !SUPABASE_KEY) return { erro: true, pedidos: [] };
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?select=*&order=data.desc`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?select=*&order=data.desc&limit=200`, {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`
       }
     });
-    if (!r.ok) return [];
-    return await r.json();
+    if (!r.ok) return { erro: true, pedidos: [] };
+    const pedidos = await r.json();
+    return { erro: false, pedidos };
   } catch (e) {
-    return [];
+    return { erro: true, pedidos: [] };
   }
 }
 
@@ -384,6 +400,13 @@ const TIPOS = {
   '.json': 'application/json; charset=utf-8',
   '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.mp4': 'video/mp4',
+  '.woff2': 'font/woff2',
+  '.xml': 'application/xml; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.txt': 'text/plain; charset=utf-8',
@@ -450,7 +473,7 @@ function servirArquivo(req, res, caminhoUrl) {
       return res.end('Página não encontrada');
     }
     const ext = path.extname(arq).toLowerCase();
-    const cache = /\.(png|svg|ico)$/.test(ext) ? 'public, max-age=86400' : 'no-cache';
+    const cache = /\.(png|gif|webp|jpg|jpeg|mp4|woff2|svg|ico)$/.test(ext) ? 'public, max-age=604800' : 'no-cache';
     res.writeHead(200, {
       'Content-Type': TIPOS[ext] || 'application/octet-stream',
       'Cache-Control': cache,
@@ -497,7 +520,7 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     if (rota === '/api/pedido' && req.method === 'POST') {
-      const ip = req.socket.remoteAddress || '?';
+      const ip = pegarIp(req);
       const agora = Date.now();
       if (agora - (ultimoPedidoPorIp.get(ip) || 0) < 60000) {
         return responderJson(res, 429, { erro: 'Aguarde um minutinho antes de enviar outro.' });
@@ -520,14 +543,17 @@ const servidor = http.createServer(async (req, res) => {
         tipo, 
         texto 
       };
-      await adicionarPedidoSupabase(novoPedido);
+      const salvo = await adicionarPedidoSupabase(novoPedido);
+      if (!salvo) {
+        return responderJson(res, 503, { erro: 'Não foi possível salvar o seu pedido no momento. Tente novamente em instantes.' });
+      }
 
       ultimoPedidoPorIp.set(ip, agora);
       return responderJson(res, 200, { ok: true });
     }
 
     if (rota === '/api/admin/login' && req.method === 'POST') {
-      const ip = req.socket.remoteAddress || '?';
+      const ip = pegarIp(req);
       const agora = Date.now();
       const registro = tentativasAdminPorIp.get(ip);
       if (registro && registro.bloqueadoAte > agora) return responderJson(res, 429, { erro: 'Aguarde alguns minutos antes de tentar novamente.' });
@@ -540,7 +566,7 @@ const servidor = http.createServer(async (req, res) => {
       if (!senhaCorreta(dados.senha)) {
         const dentroDaJanela = registro && agora - registro.inicio < JANELA_TENTATIVAS_ADMIN;
         const tentativas = dentroDaJanela ? registro.tentativas + 1 : 1;
-        tentativasAdminPorIp.set(ip, { inicio: dentroDaJanela ? registro.inicio : agora, tentativas, bloqueadoAte: tentativas >= MAX_TENTATIVAS ? agora + JANELA_TENTATIVAS_ADMIN : 0 });
+        tentativasAdminPorIp.set(ip, { inicio: dentroDaJanela ? registro.inicio : agora, tentativas, bloqueadoAte: tentativas >= MAX_TENTATIVAS_ADMIN ? agora + JANELA_TENTATIVAS_ADMIN : 0 });
         return responderJson(res, 401, { erro: 'Senha incorreta.' });
       }
       tentativasAdminPorIp.delete(ip);
@@ -558,12 +584,14 @@ const servidor = http.createServer(async (req, res) => {
     if (rota.startsWith('/api/admin/')) {
       if (!sessaoAdminValida(req)) return responderJson(res, 401, { erro: 'Entre novamente para acessar o painel.' });
       if (rota === '/api/admin/pedidos' && req.method === 'GET') {
-        const pedidos = await lerPedidos();
-        return responderJson(res, 200, { pedidos });
+        const resSup = await lerPedidos();
+        if (resSup.erro) return responderJson(res, 503, { erro: 'Não foi possível carregar os pedidos do banco de dados.' });
+        return responderJson(res, 200, { pedidos: resSup.pedidos });
       }
       const m = rota.match(/^\/api\/admin\/pedidos\/([a-f0-9]+)$/);
       if (m && req.method === 'DELETE') {
-        await apagarPedidoSupabase(m[1]);
+        const apagou = await apagarPedidoSupabase(m[1]);
+        if (!apagou) return responderJson(res, 503, { erro: 'Não foi possível apagar o pedido.' });
         return responderJson(res, 200, { ok: true });
       }
       return responderJson(res, 404, { erro: 'Não encontrado.' });
@@ -577,7 +605,6 @@ const servidor = http.createServer(async (req, res) => {
     }
     return servirArquivo(req, res, rota);
   } catch (e) {
-    console.log('[erro]', e.message);
     if (!res.headersSent) responderJson(res, 500, { erro: 'Algo deu errado por aqui.' });
   }
 });
@@ -602,7 +629,7 @@ if (require.main === module) {
     console.log('');
   });
   servidor.on('error', (e) => {
-    if (e.code === 'EADDRINUSE') console.error('A porta ' + PORTA + ' já está em uso. Feche outra janela do site ou mude "porta" no config.json.');
+    if (e.code === 'EADDRINUSE') console.error('A porta ' + PORTA + ' já está em uso.');
     else console.error(e);
     process.exit(1);
   });

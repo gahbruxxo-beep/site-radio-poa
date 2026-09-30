@@ -1,9 +1,31 @@
 (() => {
   'use strict';
 
-  const $ = (s, r = document) => r.querySelector(s);
+  // Helper tolerante: nunca retorna null, previne TypeErrors caso IDs estejam ausentes
+  const noopProxy = new Proxy({}, {
+    get: (target, prop) => {
+      if (prop === 'then') return undefined;
+      return () => noopProxy;
+    },
+    set: () => true
+  });
+
+  const $ = (s, r = document) => {
+    const el = r.querySelector(s);
+    if (!el) {
+      return new Proxy({}, {
+        get: (target, prop) => {
+          if (prop === 'textContent' || prop === 'value' || prop === 'innerHTML') return '';
+          if (prop === 'hidden' || prop === 'disabled') return false;
+          return () => noopProxy;
+        },
+        set: () => true
+      });
+    }
+    return el;
+  };
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-  const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento */ } };
+  const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
   const ler = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const el = (tag, cls, texto) => {
     const e = document.createElement(tag);
@@ -11,8 +33,9 @@
     if (texto !== undefined) e.textContent = texto;
     return e;
   };
+
   async function api(url, opcoes) {
-  const URL_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : window.location.origin;
+    const URL_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : window.location.origin;
     const r = await fetch(url.startsWith('http') ? url : URL_BASE + url, opcoes);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.erro || 'Erro ' + r.status);
@@ -94,7 +117,7 @@
     audio.src = candidatos[i];
     audio.load();
     const p = audio.play();
-    if (p && p.catch) p.catch(() => { /* o evento "error" cuida disso */ });
+    if (p && p.catch) p.catch(() => {});
     timerConexao = setTimeout(proximo, 9000);
   }
 
@@ -166,22 +189,27 @@
       });
       navigator.mediaSession.setActionHandler('play', tocar);
       navigator.mediaSession.setActionHandler('pause', parar);
-    } catch (e) { /* recurso opcional */ }
+    } catch (e) {}
   }
 
   $('#solBtn').addEventListener('click', alternar);
   $('#playerBtn').addEventListener('click', alternar);
 
-  const vol = $('#volume');
-  const volSalvo = parseFloat(ler('sr_volume'));
-  if (!isNaN(volSalvo)) vol.value = volSalvo;
-  audio.volume = parseFloat(vol.value);
-  vol.addEventListener('input', () => {
-    audio.volume = parseFloat(vol.value);
-    guardar('sr_volume', vol.value);
-  });
+  const volInput = $('#volume');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    const volContainer = $('.volume');
+    if (volContainer && volContainer.style) volContainer.style.display = 'none';
+  } else {
+    const volSalvo = parseFloat(ler('sr_volume'));
+    if (!isNaN(volSalvo)) volInput.value = volSalvo;
+    audio.volume = parseFloat(volInput.value || 0.8);
+    volInput.addEventListener('input', () => {
+      audio.volume = parseFloat(volInput.value);
+      guardar('sr_volume', volInput.value);
+    });
+  }
 
-  /* "No ar agora" e ouvintes */
   async function atualizarAoVivo() {
     if (document.hidden) return;
     try {
@@ -193,7 +221,7 @@
         box.hidden = false;
       } else box.hidden = true;
       atualizarTextosRadio();
-    } catch (e) { /* mantém o que já está na tela */ }
+    } catch (e) {}
   }
 
   /* ============================================================== */
@@ -236,7 +264,7 @@
       lista.replaceChildren();
       if (!d.itens.length) {
         const msg = d.falha
-          ? 'Não consegui buscar as notícias agora. Confira se o computador que hospeda o site está com internet.'
+          ? 'Não consegui buscar as notícias agora. Tente de novo em instantes.'
           : d.atualizadoEm
           ? 'Nenhuma notícia deste assunto ' + (periodoAtual === 'hoje' ? 'nas últimas 24 horas' : 'na última semana') + '. Experimente outro assunto ou o período "Semana".'
           : 'As notícias ainda estão sendo buscadas. Volte em alguns instantes ou toque em "Atualizar".';
@@ -248,8 +276,10 @@
         lista.appendChild(resto);
       }
       nota.textContent = d.atualizadoEm ? 'Atualizado às ' + new Date(d.atualizadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '.' : '';
+      return d.itens.length > 0;
     } catch (e) {
       lista.replaceChildren(el('p', 'vazio', 'Não consegui carregar as notícias agora. Tente novamente em instantes.'));
+      return false;
     } finally {
       lista.removeAttribute('aria-busy');
     }
@@ -296,7 +326,7 @@
         $('#resumoTexto').textContent = d.texto;
         $('#resumo').hidden = false;
       }
-    } catch (e) { /* resumo é opcional */ }
+    } catch (e) {}
   }
 
   /* ============================================================== */
@@ -506,9 +536,6 @@
   }
 
   /* ============================================================== */
-  /* Clima                                                           */
-  /* ============================================================== */
-  /* ============================================================== */
   /* Clima com Pesquisa de Cidades                                  */
   /* ============================================================== */
   function descreverClima(cod) {
@@ -517,11 +544,14 @@
     if (cod === 2) return ['⛅', 'Parcialmente nublado'];
     if (cod === 3) return ['☁️', 'Nublado'];
     if (cod === 45 || cod === 48) return ['🌫️', 'Neblina'];
-    if (cod >= 51 && cod <= 57) return ['🌦️', 'Garoa'];
-    if (cod >= 61 && cod <= 67) return ['🌧️', 'Chuva'];
-    if (cod >= 71 && cod <= 77) return ['❄️', 'Frio intenso'];
+    if (cod >= 51 && cod <= 55) return ['🌦️️', 'Garoa'];
+    if (cod === 56 || cod === 57) return ['🌧️', 'Garoa congelante'];
+    if (cod >= 61 && cod <= 65) return ['🌧️', 'Chuva'];
+    if (cod === 66 || cod === 67) return ['🌧️', 'Chuva congelante'];
+    if (cod >= 71 && cod <= 77) return ['❄️', 'Neve'];
     if (cod >= 80 && cod <= 82) return ['🌧️', 'Pancadas de chuva'];
-    if (cod >= 95) return ['⛈️', 'Tempestade'];
+    if (cod === 85 || cod === 86) return ['🌨️', 'Pancadas de neve'];
+    if (cod >= 95) return ['⛈', 'Tempestade'];
     return ['🌡️', 'Tempo instável'];
   }
 
@@ -531,20 +561,16 @@
 
   async function buscarCoordenadas(nomeCidade) {
     try {
-      console.log('Buscando coordenadas para:', nomeCidade);
-      let geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomeCidade)}&count=5&language=pt&format=json`;
+      let geoUrl = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(nomeCidade) + '&count=5&language=pt&countryCode=BR&format=json';
       let r = await fetch(geoUrl);
       let j = await r.json();
-      console.log('Resposta da API (tentativa 1):', j);
 
       if (!j.results || j.results.length === 0) {
         const nomeLimpo = nomeCidade.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         if (nomeLimpo !== nomeCidade) {
-          console.log('Tentando sem acentos:', nomeLimpo);
-          geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomeLimpo)}&count=5&language=pt&format=json`;
+          geoUrl = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(nomeLimpo) + '&count=5&language=pt&countryCode=BR&format=json';
           r = await fetch(geoUrl);
           j = await r.json();
-          console.log('Resposta da API (tentativa sem acentos):', j);
         }
       }
 
@@ -552,12 +578,10 @@
         return {
           lat: j.results[0].latitude,
           lon: j.results[0].longitude,
-          nome: `${j.results[0].name}${j.results[0].admin1 ? ' - ' + j.results[0].admin1 : ''}`
+          nome: j.results[0].name + (j.results[0].admin1 ? ' - ' + j.results[0].admin1 : '')
         };
       }
-    } catch (e) {
-      console.error('Erro na requisição da API de geocodificação:', e);
-    }
+    } catch (e) {}
     return null;
   }
 
@@ -575,13 +599,19 @@
         guardar('sr_clima_lat', latAtual);
         guardar('sr_clima_lon', lonAtual);
       } else {
-        alert('Cidade não encontrada. Verifique o nome e tente novamente.');
+        const conteudoClima = $('#conteudoClimaDados');
+        if (conteudoClima) {
+          const avisoErro = el('p', 'nota', 'Cidade não encontrada. Verifique o nome e tente novamente.');
+          avisoErro.style.color = '#B5384A';
+          conteudoClima.prepend(avisoErro);
+          setTimeout(() => avisoErro.remove(), 4000);
+        }
         return;
       }
     }
 
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${latAtual}&longitude=${lonAtual}` +
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + latAtual + '&longitude=' + lonAtual +
         '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
         '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
         '&timezone=America%2FSao_Paulo&forecast_days=5';
@@ -591,24 +621,20 @@
       const j = await r.json();
       const [emoji, desc] = descreverClima(j.current.weather_code);
 
-      // Cria a barra de pesquisa apenas uma vez para não perder o foco ao atualizar
       let conteudoClima = $('#conteudoClimaDados');
       if (!conteudoClima) {
         box.replaceChildren();
         
         const barraBusca = el('div', 'clima-busca');
-        barraBusca.style.cssText = 'display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center;';
         
         const input = el('input', 'input-cidade');
         input.type = 'text';
         input.id = 'inputCidadeSearch';
         input.placeholder = 'Digite outra cidade...';
-        input.value = cidadeAtual;
-        input.style.cssText = 'padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; flex: 1; max-width: 250px;';
+        input.value = '';
 
         const btn = el('button', 'btn-busca-cidade', 'Pesquisar');
         btn.type = 'button';
-        btn.style.cssText = 'padding: 8px 16px; border-radius: 6px; border: none; background: #0f172a; color: #fff; cursor: pointer; font-weight: bold;';
 
         const executarBusca = () => {
           const val = $('#inputCidadeSearch').value.trim();
@@ -637,15 +663,13 @@
       } else {
         const input = $('#inputCidadeSearch');
         if (input && document.activeElement !== input) {
-          input.value = cidadeAtual;
+          input.value = '';
         }
         conteudoClima.replaceChildren();
       }
 
-      // Exibe o local atual
       const pLocal = el('p', 'clima-local');
-      pLocal.style.cssText = 'font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; text-align: center;';
-      pLocal.textContent = `📍 Previsão para: ${cidadeAtual}`;
+      pLocal.textContent = '📍 Previsão para: ' + cidadeAtual;
       conteudoClima.appendChild(pLocal);
 
       const agora = el('div', 'clima-agora');
@@ -670,10 +694,14 @@
       });
       conteudoClima.appendChild(dias);
     } catch (e) {
-      const conteudoClima = $('#conteudoClimaDados');
-      if (conteudoClima) {
-        conteudoClima.replaceChildren(el('p', 'nota', 'Não consegui carregar a previsão agora. Tente novamente em instantes.'));
-      }
+      box.replaceChildren();
+      const erroBox = el('div', 'vazio');
+      erroBox.appendChild(el('p', '', 'Não consegui carregar a previsão do tempo.'));
+      const btnTentar = el('button', 'btn-sec', 'Tentar de novo');
+      btnTentar.type = 'button';
+      btnTentar.addEventListener('click', () => carregarClima());
+      erroBox.appendChild(btnTentar);
+      box.appendChild(erroBox);
     }
   }
 
@@ -689,7 +717,6 @@
     return a;
   };
 
-  /* Gauchês do dia */
   const GAUCHES = [
     ['Bah', 'Expressão de surpresa, espanto ou admiração. Serve para quase tudo.'],
     ['Tchê', 'Jeito de chamar alguém, parecido com "cara" ou "amigo".'],
@@ -719,7 +746,6 @@
     $('#gOutra').addEventListener('click', () => { gIdx++; mostrarGauches(); });
   }
 
-  /* Quiz */
   const PERGUNTAS = [
     { p: 'Qual é o nome das águas que banham Porto Alegre e são famosas pelo pôr do sol?', o: ['Guaíba', 'Rio Uruguai', 'Rio Taquari', 'Lagoa Mirim'], c: 0 },
     { p: 'Qual bebida é símbolo da cultura gaúcha?', o: ['Chimarrão', 'Guaraná', 'Caipirinha', 'Sidra'], c: 0 },
@@ -788,7 +814,6 @@
     box.appendChild(rod);
   }
 
-  /* Forca */
   const PALAVRAS = [
     ['CHIMARRAO', 'Bebida símbolo do Rio Grande do Sul'],
     ['BERGAMOTA', 'Fruta que vira "tangerina" em outros estados'],
@@ -894,9 +919,17 @@
   });
 
   /* ============================================================== */
-  /* Início                                                          */
+  /* Início imediato com retentativas inteligentes para Notícias     */
   /* ============================================================== */
-    async function iniciar() {
+  async function carregarNoticiasComRetentativa(tentativa = 0) {
+    const sucesso = await carregarNoticias(false);
+    if (!sucesso && tentativa < 3) {
+      const atrasos = [4000, 8000, 16000];
+      setTimeout(() => carregarNoticiasComRetentativa(tentativa + 1), atrasos[tentativa]);
+    }
+  }
+
+  async function iniciar() {
     iniciarHoroscopo();
     iniciarGauches();
     novoQuiz();
@@ -904,7 +937,7 @@
 
     try {
       CFG = await api('/api/config');
-    } catch (e) { /* usa o padrão */ }
+    } catch (e) {}
     document.title = CFG.nomeRadio + ' - rádio online, notícias e horóscopo';
     if ($('#marca')) $('#marca').textContent = CFG.nomeRadio;
     if ($('#hNome')) $('#hNome').textContent = CFG.nomeRadio;
@@ -914,13 +947,10 @@
 
     if (CFG.categorias) montarChips(CFG.categorias);
     
-    // Pequena pausa inteligente de 1.5 segundos para a Render acordar o banco de dados antes de listar as notícias
-    setTimeout(() => {
-        carregarNoticias(false);
-        carregarClima();
-        carregarResumo();
-        atualizarAoVivo();
-    }, 1500);
+    carregarNoticiasComRetentativa();
+    carregarClima();
+    carregarResumo();
+    atualizarAoVivo();
 
     setInterval(atualizarAoVivo, 20000);
     setInterval(() => carregarNoticias(false), 10 * 60000);
@@ -930,9 +960,10 @@
   iniciar();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => { /* opcional */ });
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
-})();// Navegação suave por foco para Smart TV (D-Pad)
+})();
+
 document.addEventListener('focusin', (e) => {
   const el = e.target;
   if (['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) {
