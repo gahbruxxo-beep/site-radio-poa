@@ -1,223 +1,224 @@
-<!doctype html>
+name=public/index.html
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Web Rádio Zona Sul | Música, Notícias e Recados em Porto Alegre</title>
-  <link rel="icon" type="image/png" href="logo-poa-icone-1024.png">
-  <meta name="description" content="Ouça a Web Rádio Zona Sul ao vivo em Porto Alegre. Acompanhe as notícias da Zona Sul, faça pedidos musicais, envie recados e fique por dentro do resumo do dia!">
-  <meta name="keywords" content="web rádio zona sul, rádio porto alegre, notícias zona sul poa, rádio online porto alegre, música ao vivo porto alegre">
-  <meta name="theme-color" content="#1B2140">
-  <meta property="og:title" content="Web Rádio Zona Sul | A Voz de Porto Alegre">
-  <meta property="og:description" content="Ouça o melhor som, notícias locais da Zona Sul de Porto Alegre e envie os seus recados e pedidos musicais.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Rádio Zona Sul Porto Alegre - Música, Notícias e Boa Companhia</title>
+  <meta name="description" content="Ouça a Web Rádio Zona Sul de Porto Alegre ao vivo. Notícias atualizadas, resumos com inteligência artificial, previsão do tempo e pedidos de música em tempo real.">
+  <meta name="keywords" content="Rádio, Zona Sul, Porto Alegre, Web Rádio, Notícias, POA, Música, Pedidos">
+  <meta name="theme-color" content="#1b4d3e">
+
+  <!-- Open Graph / Redes Sociais -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://webradiozonasulpoa.onrender.com/">
+  <meta property="og:title" content="Web Rádio Zona Sul Porto Alegre">
+  <meta property="og:description" content="A sua rádio da Zona Sul de Porto Alegre. Música boa, notícias locais e recados ao vivo.">
   <meta property="og:locale" content="pt_BR">
+
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="apple-touch-icon" href="logo-poa-icone-1024.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+  <!-- Estilos e Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "RadioStation",
-  "name": "Web Rádio Zona Sul",
-  "url": "https://webradiozonasulpoa.onrender.com/",
-  "areaServed": {
-    "@type": "AdministrativeArea",
-    "name": "Zona Sul, Porto Alegre - RS"
-  },
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Porto Alegre",
-    "addressRegion": "RS",
-    "addressCountry": "BR"
-  },
-  "genre": ["Música Variada", "Notícias Locais"],
-  "description": "A sua conexão musical e informativa na Zona Sul de Porto Alegre."
-}
-</script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
-<body data-radio="parado">
-<a class="pular" href="#noticias">Ir para as notícias</a>
-
-<header class="topo">
-  <a class="marca" href="#inicio">
-    <img id="logoTopo" src="logo-poa-completo.png" alt="Web Rádio Zona Sul" style="height: 38px; width: auto; display: block;">
-  </a>
-  <nav class="menu" aria-label="Seções do site">
-    <a href="#noticias">Notícias</a>
-    <a href="#horoscopo">Horóscopo</a>
-    <a href="#tempo">Tempo</a>
-    <a href="#passatempo">Passatempo</a>
-    <a href="#pedidos">Pedidos</a>
-  </nav>
-</header>
-
-<main>
-<section class="hero" id="inicio" aria-label="Rádio ao vivo">
-  <div class="hero-in glass-card">
-    <div class="badge-ao-vivo">🔴 AO VIVO AGORA</div>
-    
-    <div style="margin-bottom: 20px;">
-      <img src="logo-poa-animado-completo.gif" alt="Web Rádio Zona Sul Animado" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto;" width="220" height="100">
-    </div>
-
-    <h1 class="neon-title">Web Rádio Zona Sul</h1>
-    <p class="slogan-sub">Porto Alegre • A sua conexão musical definitiva</p>
-    
-    <div class="hero-player-box">
-      <button class="sol-btn-modern" id="solBtn" type="button" aria-label="Ouvir a rádio">
-        <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#fff"/></svg>
-        <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#fff"/></svg>
-        <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
-      </button>
-      <p class="agora" aria-live="polite">
-        <span class="ponto" aria-hidden="true"></span>
-        <span id="agoraTexto">Toque no botão para ouvir a transmissão</span>
-      </p>
-    </div>
-  </div>
-  <p class="hero-aviso" id="heroAviso" role="status"></p>
-</section>
-
-  <!-- Notícias -->
-  <section class="secao" id="noticias">
-    <div class="secao-in">
-      <div class="secao-cab">
-        <div>
-          <h2>Notícias de Porto Alegre e região</h2>
-          <p class="secao-sub">Manchetes reunidas de vários portais e atualizadas sozinhas. Ao tocar numa notícia, você abre a matéria no site original.</p>
-        </div>
-        <div class="noticia-controles">
-          <div class="segmento" role="group" aria-label="Período">
-            <button type="button" data-periodo="hoje" aria-pressed="true">Hoje</button>
-            <button type="button" data-periodo="semana" aria-pressed="false">Semana</button>
+<body>
+  <!-- Cabeçalho -->
+  <header class="site-header">
+    <div class="container header-container">
+      <div class="logo-area">
+        <h1>Web Rádio Zona Sul</h1>
+        <p class="slogan">O som e a voz da Zona Sul de Porto Alegre</p>
+      </div>
+      <div class="header-widgets">
+        <div id="widget-tempo" class="widget-tempo" title="Previsão do tempo para Porto Alegre">
+          <span class="tempo-icone">⛅</span>
+          <div class="tempo-info">
+            <span class="tempo-temp">--°C</span>
+            <span class="tempo-cond">Porto Alegre</span>
           </div>
-          <button type="button" class="btn-sec" id="btnAtualizar">Atualizar</button>
         </div>
       </div>
+    </div>
+  </header>
 
-      <div class="chips" id="chips" role="group" aria-label="Assuntos"></div>
-
-      <div class="resumo" id="resumo" hidden>
-        <h3>Resumo do dia</h3>
-        <p id="resumoTexto"></p>
+  <!-- Player Principal (Fixo ou Destacado) -->
+  <section class="player-section">
+    <div class="container player-card">
+      <div class="player-info">
+        <div class="vinyl-disc" id="vinyl-disc">
+          <div class="vinyl-center"></div>
+        </div>
+        <div class="track-details">
+          <span class="live-badge" id="live-badge"><span class="pulse-dot"></span> AO VIVO</span>
+          <h2 id="current-track" class="current-track">Conectando à rádio...</h2>
+          <p class="station-name">Web Rádio Zona Sul POA</p>
+        </div>
       </div>
-
-      <div id="listaNoticias" class="noticias" aria-live="polite"></div>
-      <p class="nota" id="notaNoticias"></p>
-    </div>
-  </section>
-
-  <!-- Horóscopo -->
-  <section class="secao secao-clara" id="horoscopo">
-    <div class="secao-in">
-      <h2>Horóscopo do dia</h2>
-      <p class="secao-sub">Escolha o seu signo e leia a previsão de hoje. Ela muda todo dia.</p>
-
-      <div class="signos" id="signos" role="group" aria-label="Escolha o signo"></div>
-
-      <details class="descobrir">
-        <summary>Não sei o meu signo</summary>
-        <div class="descobrir-form">
-          <label>Dia
-            <select id="selDia"></select>
-          </label>
-          <label>Mês
-            <select id="selMes"></select>
-          </label>
-          <button type="button" class="btn-sec" id="btnDescobrir">Descobrir</button>
-          <p id="descobrirResp" role="status"></p>
-        </div>
-      </details>
-
-      <article class="horoscopo" id="horoscopoBox" hidden aria-live="polite"></article>
-      <p class="nota">Horóscopo feito para diversão. Ele é gerado pelo próprio site e não substitui a opinião de um astrólogo.</p>
-    </div>
-  </section>
-
-  <!-- Clima -->
-  <section class="secao" id="tempo">
-    <div class="secao-in">
-      <h2>Tempo em Porto Alegre</h2>
-      <div class="clima" id="clima" aria-live="polite">
-        <p class="nota">Carregando a previsão…</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Passatempo -->
-  <section class="secao secao-clara" id="passatempo">
-    <div class="secao-in">
-      <h2>Passatempo</h2>
-      <p class="secao-sub">Um joguinho enquanto a música toca.</p>
-
-      <div class="passa-grade">
-        <div class="bloco" id="gauches">
-          <h3>Gauchês do dia</h3>
-          <p class="gauches-termo" id="gTermo"></p>
-          <p id="gSig"></p>
-          <button type="button" class="btn-sec" id="gOutra">Outra palavra</button>
-        </div>
-
-        <div class="bloco" id="quiz">
-          <h3>Quiz: você conhece Porto Alegre?</h3>
-          <div id="quizCorpo"></div>
-        </div>
-
-        <div class="bloco" id="forca">
-          <h3>Jogo da forca gaúcha</h3>
-          <div id="forcaCorpo"></div>
+      <div class="player-controls">
+        <button id="btn-play-stop" class="btn-primary-play" aria-label="Ouvir rádio">
+          <svg class="icon-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <span id="play-text">Ouvir Rádio</span>
+        </button>
+        <div class="volume-control">
+          <svg class="icon-volume" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          <input type="range" id="volume-range" min="0" max="1" step="0.05" value="0.8" aria-label="Controle de volume">
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Pedidos -->
-  <section class="secao" id="pedidos">
-    <div class="secao-in secao-estreita">
-      <h2>Peça uma música ou mande um recado</h2>
-      <p class="secao-sub">Sua mensagem chega direto para quem cuida da rádio.</p>
-      <form id="formPedido" class="form" novalidate>
-        <fieldset class="tipo">
-          <legend>O que você quer enviar?</legend>
-          <label><input type="radio" name="tipo" value="musica" checked> Pedir uma música</label>
-          <label><input type="radio" name="tipo" value="recado"> Mandar um recado</label>
-        </fieldset>
-        <label>Seu nome
-          <input type="text" id="pNome" maxlength="40" autocomplete="name" placeholder="Como quer ser chamado?">
-        </label>
-        <label>Mensagem
-          <textarea id="pTexto" maxlength="300" rows="4" placeholder="Ex.: Toca “nome da música” do artista, para a minha mãe"></textarea>
-        </label>
-        <button type="submit" class="btn-prim">Enviar</button>
-        <p id="pResp" role="status"></p>
-      </form>
+  <!-- Navegação por Abas -->
+  <nav class="nav-tabs" aria-label="Seções do site">
+    <div class="container tabs-container">
+      <button class="tab-btn active" data-target="secao-noticias">📰 Notícias e POA</button>
+      <button class="tab-btn" data-target="secao-pedidos">🎵 Pedidos e Recados</button>
+      <button class="tab-btn" data-target="secao-programacao">📅 Programação</button>
+      <button class="tab-btn" data-target="secao-sobre">ℹ️ A Rádio</button>
     </div>
-  </section>
-</main>
+  </nav>
 
-<footer class="rodape">
-  <p id="rodapeNome">Rádio</p>
-  <p class="nota">As notícias pertencem aos veículos que as publicaram. Previsão do tempo de Open-Meteo.</p>
-</footer>
+  <!-- Conteúdo Principal -->
+  <main class="container main-content">
+    
+    <!-- SEÇÃO: NOTÍCIAS -->
+    <section id="secao-noticias" class="tab-section active">
+      <div class="section-header-flex">
+        <h2>Últimas Notícias e Região</h2>
+        <div class="news-filters">
+          <button class="filter-btn active" data-periodo="hoje">Hoje</button>
+          <button class="filter-btn" data-periodo="semana">Última Semana</button>
+        </div>
+      </div>
 
-<!-- Player fixo -->
-<div class="player" id="player">
-  <button class="player-btn" id="playerBtn" type="button" aria-label="Ouvir a rádio">
-    <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="#1B2140"/></svg>
-    <svg class="ico-pausa" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="#1B2140"/></svg>
-    <svg class="ico-carrega" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#1B2140" stroke-width="3" stroke-dasharray="30 60" stroke-linecap="round"/></svg>
-  </button>
-  <div class="player-info">
-    <p class="player-estado" id="playerEstado">Parada</p>
-    <p class="player-musica" id="playerMusica">Toque para ouvir</p>
-  </div>
-</div>
+      <!-- Resumo do Dia por IA -->
+      <div id="ai-resumo-card" class="ai-resumo-card" style="display:none;">
+        <div class="ai-header">
+          <span class="ai-icon">✨</span>
+          <h3>Resumo do Dia (Gerado por Inteligência Artificial)</h3>
+        </div>
+        <p id="ai-resumo-texto">Carregando resumo inteligente das notícias...</p>
+      </div>
 
-<script src="/app.js"></script>
+      <!-- Filtro de Categorias -->
+      <div class="categorias-chips" id="categorias-chips">
+        <button class="chip active" data-cat="todas">Todas</button>
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- Lista de Notícias -->
+      <div id="news-container" class="news-grid">
+        <div class="loading-state">Buscando notícias fresquinhas para você...</div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO: PEDIDOS E RECADOS -->
+    <section id="secao-pedidos" class="tab-section">
+      <div class="pedidos-layout">
+        <div class="card form-card">
+          <h2>Mande seu Pedido ou Recado</h2>
+          <p>Peça sua música favorita ou mande um abraço para a galera da Zona Sul!</p>
+          
+          <form id="form-pedido">
+            <div class="form-group">
+              <label for="input-nome">Seu Nome / Bairro:</label>
+              <input type="type" id="input-nome" placeholder="Ex: João - Tristeza" maxlength="40" required>
+            </div>
+            
+            <div class="form-group">
+              <label>O que você quer enviar?</label>
+              <div class="radio-group">
+                <label><input type="radio" name="tipo" value="musica" checked> Pedido de Música</label>
+                <label><input type="radio" name="tipo" value="recado"> Recado / Alô</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-texto">Mensagem ou Nome da Música:</label>
+              <textarea id="input-texto" rows="4" placeholder="Ex: Toca Charlie Brown Jr. - Só os Loucos Sabem, um abraço pro pessoal da Lomba do Pinheiro!" maxlength="300" required></textarea>
+              <small class="caracteres-aviso"><span id="chars-restantes">300</span> caracteres restantes</small>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-enviar-pedido">Enviar para o Locutor</button>
+            <div id="pedido-feedback" class="form-feedback" style="display:none;"></div>
+          </form>
+        </div>
+
+        <div class="card info-recados-card">
+          <h3>Como funciona?</h3>
+          <p>Nossa equipe recebe seus pedidos diretamente no estúdio em tempo real. Fique ligado na programação para ouvir sua música ou o seu alô!</p>
+          <div class="studio-status-box">
+            <h4>Estúdio Web Rádio Zona Sul</h4>
+            <p>📍 Porto Alegre - RS</p>
+            <p>📻 Transmissão 24h digital</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO: PROGRAMAÇÃO -->
+    <section id="secao-programacao" class="tab-section">
+      <h2>Programação da Semana</h2>
+      <p class="section-subtitle">Confira os programas que acompanham o seu dia na Zona Sul.</p>
+      
+      <div class="schedule-grid">
+        <div class="schedule-card">
+          <span class="schedule-time">06:00 - 09:00</span>
+          <h3>Manhã Zona Sul</h3>
+          <p>Acorde bem informado com as principais notícias de Porto Alegre, trânsito e clássicos do rock e pop.</p>
+        </div>
+        <div class="schedule-card">
+          <span class="schedule-time">09:00 - 14:00</span>
+          <h3>Sequência Total</h3>
+          <p>As melhores músicas para embalar o seu dia de trabalho sem interrupções chatas.</p>
+        </div>
+        <div class="schedule-card">
+          <span class="schedule-time">14:00 - 18:00</span>
+          <h3>Tarde na Zona</h3>
+          <p>Alegria, recados dos ouvintes, os pedidos musicais da tarde e muita descontração.</p>
+        </div>
+        <div class="schedule-card">
+          <span class="schedule-time">18:00 - 23:00</span>
+          <h3>Noite Especial</h3>
+          <p>Especiais musicais, flashback, balada e o melhor da MPB e internacional.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO: SOBRE -->
+    <section id="secao-sobre" class="tab-section">
+      <div class="card about-card">
+        <h2>Sobre a Web Rádio Zona Sul</h2>
+        <p>A <strong>Web Rádio Zona Sul</strong> nasceu com o propósito de conectar os moradores dos bairros de Porto Alegre através de boa música, prestação de serviço, jornalismo ágil e entretenimento de qualidade.</p>
+        <p>Transmitindo 24 horas por dia diretamente da Zona Sul para o mundo, levamos a nossa identidade, cultura e alegria para onde você estiver.</p>
+        
+        <hr class="divider">
+        
+        <h3>Fale Conosco</h3>
+        <p>Tem alguma sugestão, crítica ou parceria? Entre em contato com a nossa produção.</p>
+        <p>📧 E-mail: contato@webradiozonasulpoa.com.br</p>
+        <p>📱 WhatsApp da Produção: (51) 99999-9999</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 Web Rádio Zona Sul Porto Alegre. Todos os direitos reservados.</p>
+      <p><a href="/admin" class="admin-link">Acesso Restrito (Painel do Locutor)</a></p>
+    </div>
+  </footer>
+
+  <!-- Elemento de Áudio Oculto -->
+  <audio id="audio-stream" preload="none"></audio>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
 </body>
 </html>
