@@ -1,3 +1,4 @@
+name=public/index.html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +7,7 @@
   <title>Web Rádio Zona Sul Porto Alegre - Música, Notícias e Boa Companhia</title>
   <meta name="description" content="Ouça a Web Rádio Zona Sul de Porto Alegre ao vivo. Notícias atualizadas, resumos com inteligência artificial, previsão do tempo e pedidos de música em tempo real.">
   <meta name="keywords" content="Rádio, Zona Sul, Porto Alegre, Web Rádio, Notícias, POA, Música, Pedidos">
-  <meta name="theme-color" content="#1B2140">
+  <meta name="theme-color" content="#1b4d3e">
 
   <!-- Open Graph / Redes Sociais -->
   <meta property="og:type" content="website">
@@ -15,14 +16,14 @@
   <meta property="og:locale" content="pt_BR">
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
   <!-- Estilos e Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <!-- Cabeçalho -->
@@ -44,7 +45,7 @@
     </div>
   </header>
 
-  <!-- Player Principal -->
+  <!-- Player Principal (Fixo ou Destacado) -->
   <section class="player-section">
     <div class="container player-card">
       <div class="player-info">
@@ -63,6 +64,10 @@
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
           <span id="play-text">Ouvir Rádio</span>
         </button>
+        <div class="volume-control">
+          <svg class="icon-volume" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          <input type="range" id="volume-range" min="0" max="1" step="0.05" value="0.8" aria-label="Controle de volume">
+        </div>
       </div>
     </div>
   </section>
@@ -102,16 +107,12 @@
       <!-- Filtro de Categorias -->
       <div class="categorias-chips" id="categorias-chips">
         <button class="chip active" data-cat="todas">Todas</button>
+        <!-- Preenchido via JS -->
       </div>
 
       <!-- Lista de Notícias -->
       <div id="news-container" class="news-grid">
         <div class="loading-state">Buscando notícias fresquinhas para você...</div>
-      </div>
-
-      <!-- Botão Ver Mais Notícias -->
-      <div class="load-more-container" style="text-align: center; margin-top: 30px;">
-        <button id="btn-ver-mais-noticias" class="btn-submit" style="display:none; width: auto; padding: 10px 30px; margin: 0 auto;">Ver mais notícias</button>
       </div>
     </section>
 
@@ -123,15 +124,9 @@
           <p>Peça sua música favorita ou mande um abraço para a galera da Zona Sul!</p>
           
           <form id="form-pedido">
-            <!-- Campo honeypot anti-spam escondido por CSS -->
-            <div style="position: absolute; left: -9999px; opacity: 0;" aria-hidden="true">
-              <label for="input-site">Site</label>
-              <input type="text" id="input-site" name="site" tabindex="-1" autocomplete="off">
-            </div>
-
             <div class="form-group">
               <label for="input-nome">Seu Nome / Bairro:</label>
-              <input type="text" id="input-nome" placeholder="Ex: João - Tristeza" maxlength="40" required>
+              <input type="type" id="input-nome" placeholder="Ex: João - Tristeza" maxlength="40" required>
             </div>
             
             <div class="form-group">
@@ -145,11 +140,11 @@
             <div class="form-group">
               <label for="input-texto">Mensagem ou Nome da Música:</label>
               <textarea id="input-texto" rows="4" placeholder="Ex: Toca Charlie Brown Jr. - Só os Loucos Sabem, um abraço pro pessoal da Lomba do Pinheiro!" maxlength="300" required></textarea>
-              <small class="caracteres-aviso"><span id="chars-restantes" aria-live="polite">300</span> caracteres restantes</small>
+              <small class="caracteres-aviso"><span id="chars-restantes">300</span> caracteres restantes</small>
             </div>
 
             <button type="submit" class="btn-submit" id="btn-enviar-pedido">Enviar para o Locutor</button>
-            <div id="pResp" class="form-feedback" role="status" style="display:none;"></div>
+            <div id="pedido-feedback" class="form-feedback" style="display:none;"></div>
           </form>
         </div>
 
@@ -224,6 +219,6 @@
   <audio id="audio-stream" preload="none"></audio>
 
   <!-- Scripts -->
-  <script src="app.js"></script>
+  <script src="/js/app.js"></script>
 </body>
 </html>
