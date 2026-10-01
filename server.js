@@ -1,3 +1,4 @@
+name=server.js
 'use strict';
 /*
  * SiteRadio - servidor
@@ -99,6 +100,7 @@ function pegarIp(req) {
 function lerFeed(xml, nomePadrao) {
   const itens = [];
   
+  // Tenta RSS (<item>)
   const blocosItem = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) || [];
   for (const b of blocosItem) {
     let titulo = limparTexto(pegarTag(b, 'title'));
@@ -116,6 +118,7 @@ function lerFeed(xml, nomePadrao) {
     itens.push({ titulo, link, fonte, data: data.toISOString() });
   }
 
+  // Tenta Atom (<entry>) caso RSS venha vazio ou misturado
   const blocosEntry = xml.match(/<entry[\s>][\s\S]*?<\/entry>/gi) || [];
   for (const b of blocosEntry) {
     let titulo = limparTexto(pegarTag(b, 'title'));
@@ -227,7 +230,7 @@ function listarNoticias(catId, periodo) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Resumo do dia por I.A.                                              */
+/* Resumo do dia por I.A. (com promessa guardada)                      */
 /* ------------------------------------------------------------------ */
 let resumoCache = null;
 let promessaResumoEmAndamento = null;
@@ -277,9 +280,9 @@ async function gerarResumo() {
 }
 
 /* ------------------------------------------------------------------ */
-/* "No ar agora" e campo online                                        */
+/* "No ar agora"                                                       */
 /* ------------------------------------------------------------------ */
-let aoVivoCache = { ts: 0, dados: { musica: null, online: false } };
+let aoVivoCache = { ts: 0, dados: { musica: null, ouvintes: null } };
 
 async function lerAoVivo() {
   if (Date.now() - aoVivoCache.ts < 10000) return aoVivoCache.dados;
@@ -302,21 +305,22 @@ async function lerAoVivo() {
       return { musica: s.title, ouvintes: s.listeners };
     },
   ];
-  let musica = null;
-  let online = false;
+  let dados = { musica: null, ouvintes: null };
   for (const t of tentativas) {
     try {
       const r = await t();
-      const m = r.musica ? limparTexto(r.musica) : null;
-      if (m && m.length < 200) musica = m;
-      online = true;
-      break;
+      const musica = r.musica ? limparTexto(r.musica) : null;
+      dados = {
+        musica: musica && musica.length < 200 ? musica : null,
+        ouvintes: Number.isFinite(r.ouvintes) ? r.ouvintes : null,
+      };
+      if (dados.musica || dados.ouvintes !== null) break;
     } catch (e) {
       // próximo
     }
   }
-  aoVivoCache = { ts: Date.now(), dados: { musica, online } };
-  return aoVivoCache.dados;
+  aoVivoCache = { ts: Date.now(), dados };
+  return dados;
 }
 
 /* ------------------------------------------------------------------ */
@@ -437,15 +441,19 @@ const TIPOS = {
 };
 
 const COMPRIMIR_EXTS = new Set(['.html', '.css', '.js', '.json', '.webmanifest', '.svg', '.txt', '.xml']);
+
 const cacheArquivos = new Map();
 
 function obterArquivoMemoria(arq, ext, st) {
   const mtime = st.mtimeMs;
   const cached = cacheArquivos.get(arq);
-  if (cached && cached.mtime === mtime) return cached;
+  if (cached && cached.mtime === mtime) {
+    return cached;
+  }
 
   const bruto = fs.readFileSync(arq);
   const deveComprimir = COMPRIMIR_EXTS.has(ext);
+
   let gzipBuf = null;
   let brotliBuf = null;
 
@@ -457,7 +465,14 @@ function obterArquivoMemoria(arq, ext, st) {
   const hash = crypto.createHash('md5').update(bruto).digest('hex');
   const etag = `"${st.size}-${hash.slice(0, 10)}"`;
 
-  const item = { mtime, size: st.size, etag, bruto, gzipBuf, brotliBuf };
+  const item = {
+    mtime,
+    size: st.size,
+    etag,
+    bruto,
+    gzipBuf,
+    brotliBuf,
+  };
   cacheArquivos.set(arq, item);
   return item;
 }
@@ -526,9 +541,13 @@ function servirArquivo(req, res, caminhoUrl) {
     const ext = path.extname(arq).toLowerCase();
     const item = obterArquivoMemoria(arq, ext, st);
 
+    // ETag e 304 Not Modified
     const ifNoneMatch = req.headers['if-none-match'];
     if (ifNoneMatch && ifNoneMatch === item.etag) {
-      res.writeHead(304, { 'ETag': item.etag, 'Vary': 'Accept-Encoding' });
+      res.writeHead(304, {
+        'ETag': item.etag,
+        'Vary': 'Accept-Encoding'
+      });
       return res.end();
     }
 
@@ -594,7 +613,8 @@ const servidor = http.createServer(async (req, res) => {
       
       if (url.searchParams.get('forcar') === '1' && Date.now() - ultimaForcada > 60000) {
         ultimaForcada = Date.now();
-        atualizarTudo().catch((e) => console.error('[noticias] Erro na atualização forçada:', e.message));
+        // Dispara a atualização em segundo plano sem bloquear a resposta atual
+        atualizarTudo().catch((e) => console.error('[noticias] Erro na atualização forçada em segundo plano:', e.message));
       }
 
       return responderJson(res, 200, listarNoticias(cat, periodo), {
@@ -610,28 +630,21 @@ const servidor = http.createServer(async (req, res) => {
 
     if (rota === '/api/aovivo' && req.method === 'GET') {
       const d = await lerAoVivo();
-      return responderJson(res, 200, { musica: d.musica, online: d.online });
+      return responderJson(res, 200, { musica: d.musica });
     }
 
     if (rota === '/api/pedido' && req.method === 'POST') {
+      const ip = pegarIp(req);
+      const agora = Date.now();
+      if (agora - (ultimoPedidoPorIp.get(ip) || 0) < 60000) {
+        return responderJson(res, 429, { erro: 'Aguarde um minutinho antes de enviar outro.' });
+      }
       let d;
       try {
         d = JSON.parse(await lerCorpo(req));
       } catch (e) {
         return responderJson(res, 400, { erro: 'Não entendi o que foi enviado.' });
       }
-
-      // Honeypot anti-spam check: se o campo 'site' vier preenchido, responde ok sem gravar nada
-      if (d.site && String(d.site).trim() !== '') {
-        return responderJson(res, 200, { ok: true });
-      }
-
-      const ip = pegarIp(req);
-      const agora = Date.now();
-      if (agora - (ultimoPedidoPorIp.get(ip) || 0) < 60000) {
-        return responderJson(res, 429, { erro: 'Aguarde um minutinho antes de enviar outro.' });
-      }
-
       const nome = String(d.nome || '').trim().slice(0, 40);
       const texto = String(d.texto || '').trim().slice(0, 300);
       const tipo = d.tipo === 'recado' ? 'recado' : 'musica';
@@ -660,7 +673,7 @@ const servidor = http.createServer(async (req, res) => {
       const ip = pegarIp(req);
       const agora = Date.now();
       const registro = tentativasAdminPorIp.get(ip);
-      if (registro && registro.bloqueadoAte > agora) return responderJson(res, 429, { erro: 'Aguarde alguns minutos.' });
+      if (registro && registro.bloqueadoAte > agora) return responderJson(res, 429, { erro: 'Aguarde alguns minutos antes de tentar novamente.' });
       let dados;
       try {
         dados = JSON.parse(await lerCorpo(req, 1000));
@@ -699,7 +712,7 @@ const servidor = http.createServer(async (req, res) => {
           return responderJson(res, 200, { pedidos });
         } catch (e) {
           console.error('[admin] Erro ao ler pedidos:', e.message);
-          return responderJson(res, 503, { erro: 'Não foi possível carregar os pedidos.' });
+          return responderJson(res, 503, { erro: 'Não foi possível carregar os pedidos do banco de dados.' });
         }
       }
 
@@ -729,13 +742,23 @@ const servidor = http.createServer(async (req, res) => {
   }
 });
 
+/* ------------------------------------------------------------------ */
+/* Partida                                                             */
+/* ------------------------------------------------------------------ */
 if (require.main === module) {
   servidor.listen(PORTA, '0.0.0.0', () => {
     console.log('');
     console.log('  ' + config.nomeRadio + ' - site no ar!');
     console.log('  --------------------------------------------');
     console.log('  Neste computador:   http://localhost:' + PORTA);
+    for (const lista of Object.values(os.networkInterfaces())) {
+      for (const i of lista || []) {
+        if (i.family === 'IPv4' && !i.internal) console.log('  No celular (mesmo Wi-Fi): http://' + i.address + ':' + PORTA);
+      }
+    }
     console.log('  Painel de pedidos:  http://localhost:' + PORTA + '/admin');
+    console.log('');
+    console.log('  Deixe esta janela aberta. Para desligar, feche a janela.');
     console.log('');
   });
   servidor.on('error', (e) => {
