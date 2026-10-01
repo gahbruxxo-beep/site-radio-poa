@@ -1,7 +1,6 @@
-name=public/sw.js
 'use strict';
 
-const CACHE_NAME = 'webradio-cache-v2';
+const CACHE_NAME = 'siteradio-v4';
 const ASSETS = [
   '/',
   '/admin',
@@ -32,7 +31,6 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   
-  // Não faz cache de requisições de API ou streaming
   if (url.pathname.startsWith('/api/') || url.hostname !== location.hostname) {
     return;
   }
@@ -40,7 +38,6 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) {
-        // Atualiza o cache em segundo plano (stale-while-revalidate)
         fetch(e.request).then((res) => {
           if (res.ok) {
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, res));
