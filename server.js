@@ -1,4 +1,3 @@
-name=server.js
 'use strict';
 /*
  * SiteRadio - servidor
@@ -9,7 +8,6 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
-const zlib = require('zlib');
 
 const RAIZ = __dirname;
 const PUBLICO = path.join(RAIZ, 'public');
@@ -95,14 +93,12 @@ function pegarIp(req) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Notícias (leitura de feeds RSS e Atom)                              */
+/* Notícias (leitura de feeds RSS)                                     */
 /* ------------------------------------------------------------------ */
 function lerFeed(xml, nomePadrao) {
   const itens = [];
-  
-  // Tenta RSS (<item>)
-  const blocosItem = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) || [];
-  for (const b of blocosItem) {
+  const blocos = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) || [];
+  for (const b of blocos) {
     let titulo = limparTexto(pegarTag(b, 'title'));
     let link = limparTexto(pegarTag(b, 'link'));
     if (!link) {
@@ -117,22 +113,6 @@ function lerFeed(xml, nomePadrao) {
     if (!/^https?:\/\//i.test(link)) continue;
     itens.push({ titulo, link, fonte, data: data.toISOString() });
   }
-
-  // Tenta Atom (<entry>) caso RSS venha vazio ou misturado
-  const blocosEntry = xml.match(/<entry[\s>][\s\S]*?<\/entry>/gi) || [];
-  for (const b of blocosEntry) {
-    let titulo = limparTexto(pegarTag(b, 'title'));
-    let link = '';
-    const mLink = b.match(/<link[^>]*href="([^"]+)"/i);
-    if (mLink) link = decodificar(mLink[1]);
-    const dataTxt = limparTexto(pegarTag(b, 'updated')) || limparTexto(pegarTag(b, 'published'));
-    const data = new Date(dataTxt);
-    let fonte = nomePadrao || '';
-    if (!titulo || !link || isNaN(data.getTime())) continue;
-    if (!/^https?:\/\//i.test(link)) continue;
-    itens.push({ titulo, link, fonte, data: data.toISOString() });
-  }
-
   return itens;
 }
 
@@ -146,7 +126,6 @@ function urlGoogleNews(consulta) {
 
 const cacheNoticias = {};
 let ultimaForcada = 0;
-let primeiraBuscaConcluida = false;
 
 async function atualizarCategoria(cat) {
   const fontes = [{ url: urlGoogleNews(cat.consulta), nome: '' }];
@@ -160,7 +139,6 @@ async function atualizarCategoria(cat) {
         const xml = await buscarTexto(f.url, 10000);
         todos = todos.concat(lerFeed(xml, f.nome));
       } catch (e) {
-        console.error(`[noticias] Erro ao buscar fonte ${f.url} (${cat.id}):`, e.message);
         falhas++;
       }
     })
@@ -184,28 +162,20 @@ async function atualizarCategoria(cat) {
 }
 
 async function atualizarTudo() {
-  await Promise.all(
-    config.categorias.map(async (cat) => {
-      try {
-        await atualizarCategoria(cat);
-      } catch (e) {
-        console.error(`[noticias] Erro na categoria ${cat.id}:`, e.message);
-      }
-    })
-  );
-  primeiraBuscaConcluida = true;
+  for (const cat of config.categorias) {
+    try {
+      await atualizarCategoria(cat);
+    } catch (e) {
+      // segue
+    }
+  }
   resumoCache = null;
 }
 
 function listarNoticias(catId, periodo) {
-  const ids = catId && catId !== 'todas' ? [catId] : config.categorias.map((c) => c.id);
-  const temAlgumCache = ids.some((id) => cacheNoticias[id]);
-  if (!primeiraBuscaConcluida && !temAlgumCache) {
-    return { atualizadoEm: null, itens: [], carregando: true, falha: false };
-  }
-
   const limite = (periodo === 'hoje' ? 24 : 24 * 7) * 3600 * 1000;
   const agora = Date.now();
+  const ids = catId && catId !== 'todas' ? [catId] : config.categorias.map((c) => c.id);
   let itens = [];
   let ts = 0;
   for (const id of ids) {
@@ -226,14 +196,13 @@ function listarNoticias(catId, periodo) {
   }
   const tentou = ids.every((id) => cacheNoticias[id]);
   const falha = tentou && ids.every((id) => cacheNoticias[id].erro && !cacheNoticias[id].itens.length);
-  return { atualizadoEm: ts ? new Date(ts).toISOString() : null, itens: finais.slice(0, 30), carregando: false, falha };
+  return { atualizadoEm: ts ? new Date(ts).toISOString() : null, itens: finais.slice(0, 30), falha };
 }
 
 /* ------------------------------------------------------------------ */
-/* Resumo do dia por I.A. (com promessa guardada)                      */
+/* Resumo do dia por I.A.                                              */
 /* ------------------------------------------------------------------ */
 let resumoCache = null;
-let promessaResumoEmAndamento = null;
 
 async function gerarResumo() {
   const ia = config.ia || {};
@@ -241,42 +210,33 @@ async function gerarResumo() {
   const chave = process.env.GEMINI_API_KEY || ia.chave;
   if (!chave) return { ativo: false };
   if (resumoCache && Date.now() - resumoCache.ts < 2 * 3600 * 1000) return { ativo: true, texto: resumoCache.texto };
-  if (promessaResumoEmAndamento) return promessaResumoEmAndamento;
 
-  promessaResumoEmAndamento = (async () => {
-    try {
-      const base = listarNoticias('todas', 'hoje').itens.filter((i) => i.cat !== 'esporte').slice(0, 14);
-      const esporte = listarNoticias('esporte', 'hoje').itens.slice(0, 3);
-      const manchetes = base.concat(esporte).map((i) => '- ' + i.titulo + ' (' + i.fonte + ')');
-      if (manchetes.length < 3) return { ativo: true, texto: null };
+  const base = listarNoticias('todas', 'hoje').itens.filter((i) => i.cat !== 'esporte').slice(0, 14);
+  const esporte = listarNoticias('esporte', 'hoje').itens.slice(0, 3);
+  const manchetes = base.concat(esporte).map((i) => '- ' + i.titulo + ' (' + i.fonte + ')');
+  if (manchetes.length < 3) return { ativo: true, texto: null };
 
-      const prompt =
-        'Você é redator de uma rádio de Porto Alegre. Com base SOMENTE nestas manchetes de hoje, escreva um "Resumo do dia" ' +
-        'em português do Brasil, com 3 a 4 frases curtas e claras, em tom simpático de rádio. ' +
-        'Não invente nada que não esteja nas manchetes e não use marcações especiais.\n\n' +
-        manchetes.join('\n');
-      
-      const modelo = ia.modelo || 'gemini-2.5-flash';
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': chave },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const j = await r.json();
-      const texto = j.candidates && j.candidates[0] && j.candidates[0].content.parts.map((p) => p.text || '').join('').trim();
-      if (!texto) throw new Error('vazio');
-      resumoCache = { ts: Date.now(), texto };
-      return { ativo: true, texto };
-    } catch (e) {
-      console.error('[resumo] Erro ao gerar resumo:', e.message);
-      return { ativo: true, texto: null };
-    } finally {
-      promessaResumoEmAndamento = null;
-    }
-  })();
-
-  return promessaResumoEmAndamento;
+  const prompt =
+    'Você é redator de uma rádio de Porto Alegre. Com base SOMENTE nestas manchetes de hoje, escreva um "Resumo do dia" ' +
+    'em português do Brasil, com 3 a 4 frases curtas e claras, em tom simpático de rádio. ' +
+    'Não invente nada que não esteja nas manchetes e não use marcações especiais.\n\n' +
+    manchetes.join('\n');
+  try {
+    const modelo = ia.modelo || 'gemini-2.5-flash';
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': chave },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const texto = j.candidates && j.candidates[0] && j.candidates[0].content.parts.map((p) => p.text || '').join('').trim();
+    if (!texto) throw new Error('vazio');
+    resumoCache = { ts: Date.now(), texto };
+    return { ativo: true, texto };
+  } catch (e) {
+    return { ativo: true, texto: null };
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -347,44 +307,55 @@ const SUPABASE_URL = process.env.SUPABASE_URL || (config.supabase && config.supa
 const SUPABASE_KEY = process.env.SUPABASE_KEY || (config.supabase && config.supabase.chave);
 
 async function lerPedidos() {
-  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase não configurado');
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?select=*&order=data.desc&limit=200`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`
-    }
-  });
-  if (!r.ok) throw new Error('Erro ao ler pedidos: HTTP ' + r.status);
-  return await r.json();
+  if (!SUPABASE_URL || !SUPABASE_KEY) return { erro: true, pedidos: [] };
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?select=*&order=data.desc&limit=200`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!r.ok) return { erro: true, pedidos: [] };
+    const pedidos = await r.json();
+    return { erro: false, pedidos };
+  } catch (e) {
+    return { erro: true, pedidos: [] };
+  }
 }
 
 async function adicionarPedidoSupabase(pedido) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase não configurado');
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify(pedido)
-  });
-  if (!r.ok) throw new Error('Erro ao salvar pedido: HTTP ' + r.status);
-  return true;
+  if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(pedido)
+    });
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
 }
 
 async function apagarPedidoSupabase(id) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase não configurado');
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, {
-    method: 'DELETE',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`
-    }
-  });
-  if (!r.ok) throw new Error('Erro ao apagar pedido: HTTP ' + r.status);
-  return true;
+  if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
 }
 
 function senhaCorreta(recebida) {
@@ -419,7 +390,7 @@ function cookieSessao(req, token) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Servidor web e Cache em Memória com Compressão Zlib                */
+/* Servidor web                                                        */
 /* ------------------------------------------------------------------ */
 const TIPOS = {
   '.html': 'text/html; charset=utf-8',
@@ -439,43 +410,6 @@ const TIPOS = {
   '.ico': 'image/x-icon',
   '.txt': 'text/plain; charset=utf-8',
 };
-
-const COMPRIMIR_EXTS = new Set(['.html', '.css', '.js', '.json', '.webmanifest', '.svg', '.txt', '.xml']);
-
-const cacheArquivos = new Map();
-
-function obterArquivoMemoria(arq, ext, st) {
-  const mtime = st.mtimeMs;
-  const cached = cacheArquivos.get(arq);
-  if (cached && cached.mtime === mtime) {
-    return cached;
-  }
-
-  const bruto = fs.readFileSync(arq);
-  const deveComprimir = COMPRIMIR_EXTS.has(ext);
-
-  let gzipBuf = null;
-  let brotliBuf = null;
-
-  if (deveComprimir) {
-    gzipBuf = zlib.gzipSync(bruto);
-    brotliBuf = zlib.brotliCompressSync(bruto);
-  }
-
-  const hash = crypto.createHash('md5').update(bruto).digest('hex');
-  const etag = `"${st.size}-${hash.slice(0, 10)}"`;
-
-  const item = {
-    mtime,
-    size: st.size,
-    etag,
-    bruto,
-    gzipBuf,
-    brotliBuf,
-  };
-  cacheArquivos.set(arq, item);
-  return item;
-}
 
 const CSP = [
   "default-src 'self'",
@@ -537,53 +471,17 @@ function servirArquivo(req, res, caminhoUrl) {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       return res.end('Página não encontrada');
     }
-
     const ext = path.extname(arq).toLowerCase();
-    const item = obterArquivoMemoria(arq, ext, st);
-
-    // ETag e 304 Not Modified
-    const ifNoneMatch = req.headers['if-none-match'];
-    if (ifNoneMatch && ifNoneMatch === item.etag) {
-      res.writeHead(304, {
-        'ETag': item.etag,
-        'Vary': 'Accept-Encoding'
-      });
-      return res.end();
-    }
-
-    const cacheControl = /\.(png|gif|webp|jpg|jpeg|mp4|woff2|svg|ico)$/.test(ext)
-      ? 'public, max-age=604800'
-      : 'no-cache';
-
-    const headers = {
+    const cache = /\.(png|gif|webp|jpg|jpeg|mp4|woff2|svg|ico)$/.test(ext) ? 'public, max-age=604800' : 'no-cache';
+    res.writeHead(200, {
       'Content-Type': TIPOS[ext] || 'application/octet-stream',
-      'Cache-Control': cacheControl,
+      'Cache-Control': cache,
       'Content-Security-Policy': CSP,
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'same-origin',
-      'ETag': item.etag,
-      'Vary': 'Accept-Encoding',
-      'Content-Length': item.size
-    };
-
-    const ae = req.headers['accept-encoding'] || '';
-    if (item.brutoBuf && ae.includes('br')) {
-      headers['Content-Encoding'] = 'br';
-      headers['Content-Length'] = item.brotliBuf.length;
-      res.writeHead(200, headers);
-      if (req.method === 'HEAD') return res.end();
-      return res.end(item.brotliBuf);
-    } else if (item.gzipBuf && ae.includes('gzip')) {
-      headers['Content-Encoding'] = 'gzip';
-      headers['Content-Length'] = item.gzipBuf.length;
-      res.writeHead(200, headers);
-      if (req.method === 'HEAD') return res.end();
-      return res.end(item.gzipBuf);
-    } else {
-      res.writeHead(200, headers);
-      if (req.method === 'HEAD') return res.end();
-      return res.end(item.bruto);
-    }
+    });
+    if (req.method === 'HEAD') return res.end();
+    fs.createReadStream(arq).pipe(res);
   });
 }
 
@@ -591,11 +489,6 @@ const servidor = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
     const rota = url.pathname;
-
-    if (rota === '/healthz' && (req.method === 'GET' || req.method === 'HEAD')) {
-      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-      return res.end('ok');
-    }
 
     if (rota === '/api/config' && req.method === 'GET') {
       return responderJson(res, 200, {
@@ -610,22 +503,15 @@ const servidor = http.createServer(async (req, res) => {
     if (rota === '/api/news' && req.method === 'GET') {
       const cat = url.searchParams.get('cat') || 'todas';
       const periodo = url.searchParams.get('periodo') === 'hoje' ? 'hoje' : 'semana';
-      
       if (url.searchParams.get('forcar') === '1' && Date.now() - ultimaForcada > 60000) {
         ultimaForcada = Date.now();
-        // Dispara a atualização em segundo plano sem bloquear a resposta atual
-        atualizarTudo().catch((e) => console.error('[noticias] Erro na atualização forçada em segundo plano:', e.message));
+        await atualizarTudo();
       }
-
-      return responderJson(res, 200, listarNoticias(cat, periodo), {
-        'Cache-Control': 'public, max-age=60'
-      });
+      return responderJson(res, 200, listarNoticias(cat, periodo));
     }
 
     if (rota === '/api/resumo' && req.method === 'GET') {
-      return responderJson(res, 200, await gerarResumo(), {
-        'Cache-Control': 'public, max-age=60'
-      });
+      return responderJson(res, 200, await gerarResumo());
     }
 
     if (rota === '/api/aovivo' && req.method === 'GET') {
@@ -657,11 +543,8 @@ const servidor = http.createServer(async (req, res) => {
         tipo, 
         texto 
       };
-
-      try {
-        await adicionarPedidoSupabase(novoPedido);
-      } catch (e) {
-        console.error('[pedido] Erro ao salvar no Supabase:', e.message);
+      const salvo = await adicionarPedidoSupabase(novoPedido);
+      if (!salvo) {
         return responderJson(res, 503, { erro: 'Não foi possível salvar o seu pedido no momento. Tente novamente em instantes.' });
       }
 
@@ -707,24 +590,15 @@ const servidor = http.createServer(async (req, res) => {
       }
 
       if (rota === '/api/admin/pedidos' && req.method === 'GET') {
-        try {
-          const pedidos = await lerPedidos();
-          return responderJson(res, 200, { pedidos });
-        } catch (e) {
-          console.error('[admin] Erro ao ler pedidos:', e.message);
-          return responderJson(res, 503, { erro: 'Não foi possível carregar os pedidos do banco de dados.' });
-        }
+        const resSup = await lerPedidos();
+        if (resSup.erro) return responderJson(res, 503, { erro: 'Não foi possível carregar os pedidos do banco de dados.' });
+        return responderJson(res, 200, { pedidos: resSup.pedidos });
       }
-
       const m = rota.match(/^\/api\/admin\/pedidos\/([a-f0-9]+)$/);
       if (m && req.method === 'DELETE') {
-        try {
-          await apagarPedidoSupabase(m[1]);
-          return responderJson(res, 200, { ok: true });
-        } catch (e) {
-          console.error('[admin] Erro ao apagar pedido:', e.message);
-          return responderJson(res, 503, { erro: 'Não foi possível apagar o pedido.' });
-        }
+        const apagou = await apagarPedidoSupabase(m[1]);
+        if (!apagou) return responderJson(res, 503, { erro: 'Não foi possível apagar o pedido.' });
+        return responderJson(res, 200, { ok: true });
       }
       return responderJson(res, 404, { erro: 'Não encontrado.' });
     }
@@ -737,7 +611,6 @@ const servidor = http.createServer(async (req, res) => {
     }
     return servirArquivo(req, res, rota);
   } catch (e) {
-    console.error('[servidor] Erro não tratado:', e);
     if (!res.headersSent) responderJson(res, 500, { erro: 'Algo deu errado por aqui.' });
   }
 });

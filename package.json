@@ -1,19 +1,17 @@
 {
-  "name": "webradiozonasulpoa",
-  "version": "2.0.0",
-  "private": true,
-  "description": "Web Rádio Zona Sul Porto Alegre",
+  "name": "site-radio-poa",
+  "version": "1.0.0",
+  "description": "Site da Radio de Porto Alegre",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@capacitor/android": "^5.0.0",
-    "@capacitor/cli": "^5.0.0",
-    "@capacitor/core": "^5.0.0"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
   }
 }
