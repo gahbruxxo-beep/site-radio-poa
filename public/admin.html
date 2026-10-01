@@ -1,73 +1,33 @@
-name=public/admin.html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Locutor - Web Rádio Zona Sul</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Painel de pedidos</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
-<body class="admin-body">
-
-  <!-- Tela de Login -->
-  <div id="login-container" class="admin-login-wrapper">
-    <div class="card login-card">
-      <h2>Painel do Locutor</h2>
-      <p>Digite a senha de acesso para gerenciar os pedidos e recados.</p>
-      <form id="form-login">
-        <div class="form-group">
-          <label for="input-senha">Senha de Acesso:</label>
-          <input type="password" id="input-senha" placeholder="Senha do painel" required>
-        </div>
-        <button type="submit" class="btn-submit">Entrar no Painel</button>
-        <div id="login-feedback" class="form-feedback" style="display:none;"></div>
-      </form>
-      <p class="back-site"><a href="/">&larr; Voltar para a rádio</a></p>
+<body>
+<header>Painel de pedidos e recados</header>
+<main style="max-width: 760px; margin: 0 auto; padding: 24px 20px 60px;">
+  <form id="login">
+    <input type="password" id="senha" placeholder="Senha do painel" autocomplete="current-password">
+    <button type="submit">Entrar</button>
+    <span id="erro" class="erro"></span>
+  </form>
+  <div id="area" hidden>
+    <div class="barra" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;">
+      <button class="sec" id="atualizar" type="button">Atualizar lista</button>
+      <button class="sec" id="sair" type="button">Sair</button>
+      <span id="contagem"></span>
+      <div class="admin-stat-card">
+        <h3>Ouvintes Ao Vivo</h3>
+        <span id="adminOuvintes" class="admin-numero">—</span>
+      </div>
     </div>
+    <div id="lista"></div>
   </div>
-
-  <!-- Painel Administrativo Principal (Oculto até logar) -->
-  <div id="admin-main-container" class="admin-main-wrapper" style="display:none;">
-    <header class="admin-header">
-      <div class="container admin-header-flex">
-        <h2>Painel de Controle - Web Rádio Zona Sul</h2>
-        <div class="admin-header-actions">
-          <span class="listeners-badge" id="admin-listeners">Ouvintes ao vivo: --</span>
-          <button id="btn-logout" class="btn-secondary-small">Sair</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="container admin-content">
-      <div class="admin-section-header">
-        <h3>Pedidos de Música e Recados Recebidos</h3>
-        <button id="btn-atualizar-pedidos" class="btn-secondary-small">🔄 Atualizar Lista</button>
-      </div>
-
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Data/Hora</th>
-              <th>Nome / Bairro</th>
-              <th>Tipo</th>
-              <th>Mensagem / Música</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="pedidos-tbody">
-            <tr>
-              <td colspan="5" class="text-center">Carregando pedidos...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
-
-  <script src="/js/admin.js"></script>
+</main>
+<script src="/admin.js"></script>
 </body>
 </html>
