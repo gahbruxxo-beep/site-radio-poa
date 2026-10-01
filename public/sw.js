@@ -1,60 +1,29 @@
-name=public/sw.js
-'use strict';
-
-const CACHE_NAME = 'webradio-cache-v2';
-const ASSETS = [
-  '/',
-  '/admin',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/admin.js',
-  '/manifest.webmanifest'
-];
+/* Service worker simples: guarda só a "casca" do site para abrir mais rápido.
+   Nunca guarda a rádio, as notícias nem nenhuma chamada /api. */
+const VERSAO = 'siteradio-v2';
+const CASCA = ['/', '/style.css', '/app.js', '/admin.js', '/icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    }).then(() => self.skipWaiting())
-  );
+  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(CASCA)).then(() => self.skipWaiting()));
 });
-
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO).map((k) => caches.delete(k)))).then(() => self.clients.claim())
   );
 });
-
 self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
-  
-  // Não faz cache de requisições de API ou streaming
-  if (url.pathname.startsWith('/api/') || url.hostname !== location.hostname) {
-    return;
-  }
-
+  const req = e.request;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/') || url.pathname === '/admin' || url.pathname === '/admin.html') return;
   e.respondWith(
-    caches.match(e.request).then((cached) => {
-      if (cached) {
-        // Atualiza o cache em segundo plano (stale-while-revalidate)
-        fetch(e.request).then((res) => {
-          if (res.ok) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, res));
-          }
-        }).catch(() => {});
-        return cached;
-      }
-      return fetch(e.request).then((res) => {
-        const resClone = res.clone();
-        if (res.ok) {
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
+    fetch(req)
+      .then((r) => {
+        if (r.ok) {
+          const copia = r.clone();
+          caches.open(VERSAO).then((c) => c.put(req, copia));
         }
-        return res;
-      });
-    })
+        return r;
+      })
+      .catch(() => caches.match(req).then((r) => r || caches.match('/')))
   );
 });

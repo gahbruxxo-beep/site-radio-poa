@@ -1,25 +1,29 @@
 {
   "nomeRadio": "Web Rádio Zona Sul",
-  "slogan": "O som e a voz da Zona Sul de Porto Alegre",
-  "streamUrl": "https://stm1.painelcast.com:8424/stream",
-  "cidade": "Porto Alegre - RS",
+  "slogan": "A rádio que toca Porto Alegre",
+  "streamUrl": "https://stm9.voxhd.com.br:13270",
   "porta": 3000,
-  "senhaAdmin": "admin123",
-  "atualizarNoticiasACadaMinutos": 15,
-  "supabase": {
-    "url": "https://seu-projeto.supabase.co",
-    "chave": "sua-chave-anon-aqui"
-  },
-  "ia": {
-    "ativa": true,
-    "modelo": "gemini-2.5-flash",
-    "chave": ""
-  },
+  "senhaAdmin": "Mr4kim6q@",
+  "cidade": { "nome": "Porto Alegre", "lat": -30.0346, "lon": -51.2177 },
   "categorias": [
-    { "id": "geral", "nome": "Geral & POA", "consulta": "Porto Alegre Zona Sul" },
-    { "id": "transito", "nome": "Trânsito", "consulta": "Porto Alegre trânsito acidente EPTC" },
-    { "id": "esporte", "nome": "Esportes", "consulta": "Grêmio Internacional futebol POA" },
-    { "id": "cultura", "nome": "Cultura e Lazer", "consulta": "Porto Alegre cultura shows eventos" }
+    { "id": "cidade",  "nome": "Cidade",   "consulta": "\"Porto Alegre\" prefeitura OR bairro OR cidade OR moradores" },
+    { "id": "transito","nome": "Trânsito", "consulta": "\"Porto Alegre\" trânsito OR EPTC OR Trensurb OR ônibus OR bloqueio" },
+    { "id": "esporte", "nome": "Esporte",  "consulta": "Grêmio OR \"Sport Club Internacional\"" },
+    { "id": "regiao",  "nome": "Região",   "consulta": "Canoas OR Gravataí OR \"São Leopoldo\" OR \"Novo Hamburgo\" OR Viamão OR Alvorada OR Cachoeirinha" },
+    { "id": "cultura", "nome": "Cultura",  "consulta": "\"Porto Alegre\" show OR teatro OR exposição OR festival OR evento" },
+    { "id": "rs",      "nome": "Rio Grande do Sul", "consulta": "\"Rio Grande do Sul\" governo OR economia OR clima" }
   ],
-  "feedsExtras": []
+  "feedsExtras": [
+    { "cat": "rs", "nome": "g1 RS", "url": "https://g1.globo.com/rss/g1/rs/rio-grande-do-sul/" }
+  ],
+"atualizarNoticiasACadaMinutos": 15,
+  "ia": {
+    "ativa": false,
+    "modelo": "gemini-2.5-flash",
+    "chave": "AQ.Ab8RN6L7Vikzja7KTfi2UFQ6s5qWQEn8m5v_7pmviJFUIL9yvQ"
+  },
+  "supabase": {
+    "url": "https://ivczfmvlrbyyrlffhjmt.supabase.co",
+    "chave": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2Y3pmbXZscmJ5eXJsZmZoam10Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDY1MzMxOSwiZXhwIjoyMTA2MjI5MzE5fQ.nvIcCOgK6y_E9iq0DziGJpXlNfYSBsVcYfnLbLQmqvc"
+  }
 }
